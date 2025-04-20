@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropper - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <style>
+        .cropper-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .drop-zone:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .drop-zone.dragover {
+            border-color: #198754;
+            background-color: rgba(25, 135, 84, 0.05);
+        }
+        .preview-container {
+            position: relative;
+            max-width: 100%;
+            margin: 20px auto;
+        }
+        .cropper-container {
+            max-width: 100%;
+            height: 400px;
+            margin: 0 auto;
+        }
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+            display: none;
+        }
+        .preview-box {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .preview-box img {
+            max-width: 100%;
+            height: auto;
+        }
+        .aspect-ratio-btn {
+            margin: 2px;
+            min-width: 60px;
+        }
+        .aspect-ratio-btn.active {
+            background-color: #198754;
+            color: white;
+        }
+        .custom-ratio-input {
+            width: 60px;
+            text-align: center;
+        }
+        .download-btn {
+            width: 100%;
+        }
+        .image-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .cropper-view-box {
+            outline: 2px solid #0d6efd;
+            outline-color: rgba(13, 110, 253, 0.75);
+        }
+        .cropper-point {
+            background-color: #0d6efd;
+        }
+        .cropper-line {
+            background-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-crop-alt me-2"></i>Image Cropper
+                    </h2>
+                    
+                    <!-- Cropper Section -->
+                    <div class="cropper-card">
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="dropZone">
+                            <div class="mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                <h5>Drag & Drop Image Here</h5>
+                                <p class="text-muted">or</p>
+                                <input type="file" class="form-control" id="fileInput" accept="image/*" style="display: none;">
+                                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Choose File
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Cropper Container -->
+                        <div class="cropper-container" id="cropperContainer" style="display: none;">
+                            <img id="cropperImage" class="preview-image" alt="Image to crop">
+                        </div>
+                        
+                        <!-- Controls -->
+                        <div class="controls mt-4" style="display: none;" id="controls">
+                            <!-- Aspect Ratio -->
+                            <div class="mb-3">
+                                <label class="form-label">Aspect Ratio</label>
+                                <div class="d-flex flex-wrap mb-2">
+                                    <button class="btn btn-outline-secondary aspect-ratio-btn" data-ratio="free">Free</button>
+                                    <button class="btn btn-outline-secondary aspect-ratio-btn" data-ratio="1:1">1:1</button>
+                                    <button class="btn btn-outline-secondary aspect-ratio-btn" data-ratio="4:3">4:3</button>
+                                    <button class="btn btn-outline-secondary aspect-ratio-btn" data-ratio="16:9">16:9</button>
+                                    <button class="btn btn-outline-secondary aspect-ratio-btn" data-ratio="3:2">3:2</button>
+                                    <button class="btn btn-outline-secondary aspect-ratio-btn" data-ratio="2:3">2:3</button>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">Custom:</span>
+                                    <input type="number" class="form-control custom-ratio-input" id="customRatioWidth" min="1" value="1">
+                                    <span class="mx-2">:</span>
+                                    <input type="number" class="form-control custom-ratio-input" id="customRatioHeight" min="1" value="1">
+                                    <button class="btn btn-outline-secondary ms-2" id="applyCustomRatio">Apply</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Preview -->
+                            <div class="mb-3">
+                                <label class="form-label">Preview</label>
+                                <div class="preview-box" id="previewBox">
+                                    <img id="previewImage" alt="Preview">
+                                </div>
+                            </div>
+                            
+                            <!-- Image Info -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Original Size</h6>
+                                            <div class="image-info" id="originalSize">0 × 0 pixels</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Cropped Size</h6>
+                                            <div class="image-info" id="croppedSize">0 × 0 pixels</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Format -->
+                            <div class="mb-3">
+                                <label class="form-label">Output Format</label>
+                                <select class="form-select" id="formatSelect">
+                                    <option value="jpeg">JPEG</option>
+                                    <option value="png">PNG</option>
+                                    <option value="webp">WebP</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Download -->
+                            <button class="btn btn-success download-btn" id="downloadBtn">
+                                <i class="fas fa-download me-2"></i>Download Cropped Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Cropper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const cropperContainer = document.getElementById('cropperContainer');
+            const cropperImage = document.getElementById('cropperImage');
+            const previewBox = document.getElementById('previewBox');
+            const previewImage = document.getElementById('previewImage');
+            const controls = document.getElementById('controls');
+            const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
+            const customRatioWidth = document.getElementById('customRatioWidth');
+            const customRatioHeight = document.getElementById('customRatioHeight');
+            const applyCustomRatio = document.getElementById('applyCustomRatio');
+            const formatSelect = document.getElementById('formatSelect');
+            const originalSize = document.getElementById('originalSize');
+            const croppedSize = document.getElementById('croppedSize');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            let cropper = null;
+            let currentImage = null;
+            
+            // Handle drag and drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    handleImage(file);
+                }
+            });
+            
+            // Handle file input
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    handleImage(file);
+                }
+            });
+            
+            // Handle image
+            function handleImage(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = new Image();
+                    currentImage.onload = function() {
+                        // Update image
+                        cropperImage.src = e.target.result;
+                        cropperImage.style.display = 'block';
+                        
+                        // Show cropper container
+                        cropperContainer.style.display = 'block';
+                        
+                        // Update info
+                        originalSize.textContent = `${this.width} × ${this.height} pixels`;
+                        
+                        // Initialize cropper
+                        if (cropper) {
+                            cropper.destroy();
+                        }
+                        
+                        cropper = new Cropper(cropperImage, {
+                            aspectRatio: NaN,
+                            viewMode: 2,
+                            autoCropArea: 1,
+                            responsive: true,
+                            restore: false,
+                            preview: previewBox,
+                            crop: function(event) {
+                                croppedSize.textContent = `${Math.round(event.detail.width)} × ${Math.round(event.detail.height)} pixels`;
+                            }
+                        });
+                        
+                        // Show controls
+                        controls.style.display = 'block';
+                    };
+                    currentImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Handle aspect ratio buttons
+            aspectRatioBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    aspectRatioBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const ratio = this.dataset.ratio;
+                    if (ratio === 'free') {
+                        cropper.setAspectRatio(NaN);
+                    } else {
+                        const [w, h] = ratio.split(':').map(Number);
+                        cropper.setAspectRatio(w / h);
+                    }
+                });
+            });
+            
+            // Handle custom aspect ratio
+            applyCustomRatio.addEventListener('click', function() {
+                const width = parseInt(customRatioWidth.value);
+                const height = parseInt(customRatioHeight.value);
+                
+                if (width > 0 && height > 0) {
+                    aspectRatioBtns.forEach(btn => btn.classList.remove('active'));
+                    cropper.setAspectRatio(width / height);
+                }
+            });
+            
+            // Handle download
+            downloadBtn.addEventListener('click', function() {
+                if (cropper) {
+                    const canvas = cropper.getCroppedCanvas();
+                    const format = formatSelect.value;
+                    
+                    const link = document.createElement('a');
+                    link.download = `cropped-image.${format}`;
+                    link.href = canvas.toDataURL(`image/${format}`);
+                    link.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
