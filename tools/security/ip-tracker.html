@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Address Tracker | iLoveTools</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        .tool-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-input {
+            padding-right: 50px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 0 15px 15px 0;
+            background-color: var(--primary-color);
+            border: none;
+            width: 50px;
+        }
+        
+        .ip-info-card {
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .info-section {
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-section:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        #map {
+            height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-radius: 15px;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .history-container {
+            margin-top: 2rem;
+        }
+        
+        .history-item {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .history-item:hover {
+            background: #e9ecef;
+        }
+        
+        .history-ip {
+            font-weight: 600;
+        }
+        
+        .history-location {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        #clearHistory {
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            #map {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="tool-container my-5">
+            <h1 class="text-center mb-4">IP Address Tracker</h1>
+            <p class="text-center mb-4">Enter any IP address to get detailed location information and see it on the map</p>
+            
+            <div class="search-container">
+                <input type="text" id="ipInput" class="form-control search-input" placeholder="Search for any IP address (e.g., 8.8.8.8) or leave empty for your IP">
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search text-white"></i>
+                </button>
+            </div>
+            
+            <div id="errorMessage" class="error-message text-center"></div>
+            
+            <div class="ip-info-wrapper position-relative">
+                <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <div id="ipInfoCard" class="ip-info-card mb-4" style="display: none;">
+                    <div class="info-section">
+                        <div class="info-label">IP ADDRESS</div>
+                        <div id="ipAddress" class="info-value">-</div>
+                    </div>
+                    <div class="info-section">
+                        <div class="info-label">LOCATION</div>
+                        <div id="location" class="info-value">-</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label">TIMEZONE</div>
+                                <div id="timezone" class="info-value">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label">ISP</div>
+                                <div id="isp" class="info-value">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label">COORDINATES</div>
+                                <div id="coordinates" class="info-value">-</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-section">
+                                <div class="info-label">ASN</div>
+                                <div id="asn" class="info-value">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="mapContainer" style="display: none;">
+                    <div id="map"></div>
+                </div>
+            </div>
+            
+            <div id="historyContainer" class="history-container" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Search History</h5>
+                    <button id="clearHistory" class="btn btn-sm btn-outline-secondary">Clear History</button>
+                </div>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ipInput = document.getElementById('ipInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const ipInfoCard = document.getElementById('ipInfoCard');
+            const mapContainer = document.getElementById('mapContainer');
+            const historyContainer = document.getElementById('historyContainer');
+            const historyList = document.getElementById('historyList');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+            
+            let map;
+            let marker;
+            let searchHistory = JSON.parse(localStorage.getItem('ipTrackerHistory')) || [];
+            
+            // Initialize map
+            function initMap(lat, lng) {
+                if (map) {
+                    map.remove();
+                }
+                
+                map = L.map('map').setView([lat, lng], 13);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+            
+            // Track IP address
+            async function trackIP(ip) {
+                try {
+                    // Reset UI
+                    errorMessage.style.display = 'none';
+                    loadingOverlay.style.display = 'flex';
+                    ipInfoCard.style.display = 'none';
+                    mapContainer.style.display = 'none';
+                    
+                    // Use ip-api.com for IP tracking
+                    const url = ip ? `https://ip-api.com/json/${ip}?fields=status,message,country,regionName,city,district,zip,lat,lon,timezone,isp,as,query` : 'https://ip-api.com/json/?fields=status,message,country,regionName,city,district,zip,lat,lon,timezone,isp,as,query';
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        // Update UI with results
+                        document.getElementById('ipAddress').textContent = data.query;
+                        document.getElementById('location').textContent = `${data.city}${data.district ? ', ' + data.district : ''}, ${data.regionName}, ${data.country}${data.zip ? ' ' + data.zip : ''}`;
+                        document.getElementById('timezone').textContent = data.timezone;
+                        document.getElementById('isp').textContent = data.isp;
+                        document.getElementById('coordinates').textContent = `${data.lat}, ${data.lon}`;
+                        document.getElementById('asn').textContent = data.as || 'N/A';
+                        
+                        // Initialize map
+                        ipInfoCard.style.display = 'block';
+                        mapContainer.style.display = 'block';
+                        initMap(data.lat, data.lon);
+                        
+                        // Add to history if not already there
+                        const existingIndex = searchHistory.findIndex(item => item.ip === data.query);
+                        if (existingIndex !== -1) {
+                            searchHistory.splice(existingIndex, 1);
+                        }
+                        
+                        // Add to beginning of history array
+                        searchHistory.unshift({
+                            ip: data.query,
+                            location: `${data.city}, ${data.regionName}, ${data.country}`,
+                            lat: data.lat,
+                            lon: data.lon,
+                            timestamp: new Date().toISOString()
+                        });
+                        
+                        // Limit history to 10 items
+                        if (searchHistory.length > 10) {
+                            searchHistory.pop();
+                        }
+                        
+                        // Save history to localStorage
+                        localStorage.setItem('ipTrackerHistory', JSON.stringify(searchHistory));
+                        
+                        // Update history UI
+                        updateHistoryUI();
+                    } else {
+                        throw new Error(data.message || 'Failed to fetch IP information');
+                    }
+                } catch (error) {
+                    errorMessage.textContent = error.message || 'An error occurred while tracking the IP address';
+                    errorMessage.style.display = 'block';
+                } finally {
+                    loadingOverlay.style.display = 'none';
+                }
+            }
+            
+            // Update history UI
+            function updateHistoryUI() {
+                if (searchHistory.length > 0) {
+                    historyContainer.style.display = 'block';
+                    historyList.innerHTML = '';
+                    
+                    searchHistory.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        historyItem.innerHTML = `
+                            <div class="history-ip">${item.ip}</div>
+                            <div class="history-location">${item.location}</div>
+                        `;
+                        
+                        historyItem.addEventListener('click', () => {
+                            ipInput.value = item.ip;
+                            trackIP(item.ip);
+                        });
+                        
+                        historyList.appendChild(historyItem);
+                    });
+                } else {
+                    historyContainer.style.display = 'none';
+                }
+            }
+            
+            // Search button click event
+            searchBtn.addEventListener('click', () => {
+                const ip = ipInput.value.trim();
+                trackIP(ip);
+            });
+            
+            // Enter key press event
+            ipInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const ip = ipInput.value.trim();
+                    trackIP(ip);
+                }
+            });
+            
+            // Clear history button click event
+            clearHistoryBtn.addEventListener('click', () => {
+                searchHistory = [];
+                localStorage.removeItem('ipTrackerHistory');
+                updateHistoryUI();
+            });
+            
+            // Initial load - check for search history
+            updateHistoryUI();
+            
+            // Track user's IP on initial load
+            trackIP('');
+        });
+    </script>
+</body>
+</html> 

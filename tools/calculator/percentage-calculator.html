@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Percentage Calculator - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-percentage me-2"></i>Percentage Calculator
+                    </h2>
+                    
+                    <!-- Calculation Mode Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Select Calculation Type:</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="calcType" id="type1" value="percentageOf" checked>
+                            <label class="btn btn-outline-primary" for="type1">% of Number</label>
+                            
+                            <input type="radio" class="btn-check" name="calcType" id="type2" value="increaseDecrease">
+                            <label class="btn btn-outline-primary" for="type2">Increase/Decrease</label>
+                            
+                            <input type="radio" class="btn-check" name="calcType" id="type3" value="percentageDifference">
+                            <label class="btn btn-outline-primary" for="type3">% Difference</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Input Fields -->
+                    <div id="percentageOfInputs">
+                        <div class="mb-3">
+                            <label for="number1" class="form-label">Number:</label>
+                            <input type="number" class="form-control" id="number1" placeholder="Enter number">
+                        </div>
+                        <div class="mb-3">
+                            <label for="percentage1" class="form-label">Percentage:</label>
+                            <input type="number" class="form-control" id="percentage1" placeholder="Enter percentage">
+                        </div>
+                    </div>
+                    
+                    <div id="increaseDecreaseInputs" style="display: none;">
+                        <div class="mb-3">
+                            <label for="originalValue" class="form-label">Original Value:</label>
+                            <input type="number" class="form-control" id="originalValue" placeholder="Enter original value">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newValue" class="form-label">New Value:</label>
+                            <input type="number" class="form-control" id="newValue" placeholder="Enter new value">
+                        </div>
+                    </div>
+                    
+                    <div id="percentageDifferenceInputs" style="display: none;">
+                        <div class="mb-3">
+                            <label for="value1" class="form-label">First Value:</label>
+                            <input type="number" class="form-control" id="value1" placeholder="Enter first value">
+                        </div>
+                        <div class="mb-3">
+                            <label for="value2" class="form-label">Second Value:</label>
+                            <input type="number" class="form-control" id="value2" placeholder="Enter second value">
+                        </div>
+                    </div>
+                    
+                    <!-- Calculate Button -->
+                    <div class="d-grid mb-4">
+                        <button class="btn btn-primary" id="calculateBtn">
+                            <i class="fas fa-calculator me-2"></i>Calculate
+                        </button>
+                    </div>
+                    
+                    <!-- Results -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Results</h5>
+                            <div id="percentageOfResult" class="result-section">
+                                <p class="mb-1">Result: <span id="result1" class="fw-bold">0</span></p>
+                                <p class="mb-0 text-muted small">Calculation: <span id="calculation1"></span></p>
+                            </div>
+                            
+                            <div id="increaseDecreaseResult" class="result-section" style="display: none;">
+                                <p class="mb-1">Percentage Change: <span id="result2" class="fw-bold">0%</span></p>
+                                <p class="mb-0 text-muted small">Calculation: <span id="calculation2"></span></p>
+                            </div>
+                            
+                            <div id="percentageDifferenceResult" class="result-section" style="display: none;">
+                                <p class="mb-1">Percentage Difference: <span id="result3" class="fw-bold">0%</span></p>
+                                <p class="mb-0 text-muted small">Calculation: <span id="calculation3"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calcTypeRadios = document.querySelectorAll('input[name="calcType"]');
+            const percentageOfInputs = document.getElementById('percentageOfInputs');
+            const increaseDecreaseInputs = document.getElementById('increaseDecreaseInputs');
+            const percentageDifferenceInputs = document.getElementById('percentageDifferenceInputs');
+            const percentageOfResult = document.getElementById('percentageOfResult');
+            const increaseDecreaseResult = document.getElementById('increaseDecreaseResult');
+            const percentageDifferenceResult = document.getElementById('percentageDifferenceResult');
+            const calculateBtn = document.getElementById('calculateBtn');
+            
+            // Function to show/hide input fields based on selected calculation type
+            function updateInputFields() {
+                const selectedType = document.querySelector('input[name="calcType"]:checked').value;
+                
+                percentageOfInputs.style.display = selectedType === 'percentageOf' ? 'block' : 'none';
+                increaseDecreaseInputs.style.display = selectedType === 'increaseDecrease' ? 'block' : 'none';
+                percentageDifferenceInputs.style.display = selectedType === 'percentageDifference' ? 'block' : 'none';
+                
+                percentageOfResult.style.display = selectedType === 'percentageOf' ? 'block' : 'none';
+                increaseDecreaseResult.style.display = selectedType === 'increaseDecrease' ? 'block' : 'none';
+                percentageDifferenceResult.style.display = selectedType === 'percentageDifference' ? 'block' : 'none';
+            }
+            
+            // Event listener for calculation type changes
+            calcTypeRadios.forEach(radio => {
+                radio.addEventListener('change', updateInputFields);
+            });
+            
+            // Calculate button click handler
+            calculateBtn.addEventListener('click', function() {
+                const selectedType = document.querySelector('input[name="calcType"]:checked').value;
+                
+                if (selectedType === 'percentageOf') {
+                    const number = parseFloat(document.getElementById('number1').value);
+                    const percentage = parseFloat(document.getElementById('percentage1').value);
+                    
+                    if (!isNaN(number) && !isNaN(percentage)) {
+                        const result = (number * percentage) / 100;
+                        document.getElementById('result1').textContent = result.toFixed(2);
+                        document.getElementById('calculation1').textContent = 
+                            `${number} × ${percentage}% = ${result.toFixed(2)}`;
+                    }
+                }
+                else if (selectedType === 'increaseDecrease') {
+                    const original = parseFloat(document.getElementById('originalValue').value);
+                    const newValue = parseFloat(document.getElementById('newValue').value);
+                    
+                    if (!isNaN(original) && !isNaN(newValue)) {
+                        const change = ((newValue - original) / original) * 100;
+                        document.getElementById('result2').textContent = 
+                            `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                        document.getElementById('calculation2').textContent = 
+                            `((${newValue} - ${original}) / ${original}) × 100 = ${change.toFixed(2)}%`;
+                    }
+                }
+                else if (selectedType === 'percentageDifference') {
+                    const value1 = parseFloat(document.getElementById('value1').value);
+                    const value2 = parseFloat(document.getElementById('value2').value);
+                    
+                    if (!isNaN(value1) && !isNaN(value2)) {
+                        const difference = (Math.abs(value1 - value2) / ((value1 + value2) / 2)) * 100;
+                        document.getElementById('result3').textContent = `${difference.toFixed(2)}%`;
+                        document.getElementById('calculation3').textContent = 
+                            `(|${value1} - ${value2}| / ((${value1} + ${value2}) / 2)) × 100 = ${difference.toFixed(2)}%`;
+                    }
+                }
+            });
+            
+            // Initialize the calculator
+            updateInputFields();
+        });
+    </script>
+</body>
+</html> 

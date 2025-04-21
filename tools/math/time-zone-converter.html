@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Zone Converter - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .time-zone-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .time-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .date-display {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .time-difference {
+            font-size: 0.9rem;
+            color: #198754;
+        }
+        .time-difference.negative {
+            color: #dc3545;
+        }
+        .world-clock {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .clock-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .clock-time {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .clock-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .meeting-time {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .daylight-saving {
+            font-size: 0.8rem;
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-globe me-2"></i>Time Zone Converter
+                    </h2>
+                    
+                    <!-- Converter Section -->
+                    <div class="time-zone-card">
+                        <div class="row g-3">
+                            <!-- From Time Zone -->
+                            <div class="col-md-6">
+                                <label class="form-label">From:</label>
+                                <div class="input-group">
+                                    <input type="datetime-local" class="form-control" id="fromDateTime">
+                                    <select class="form-select" id="fromTimeZone">
+                                        <option value="UTC">UTC</option>
+                                        <option value="America/New_York">New York (EST/EDT)</option>
+                                        <option value="Europe/London">London (GMT/BST)</option>
+                                        <option value="Europe/Paris">Paris (CET/CEST)</option>
+                                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                        <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+                                        <option value="Asia/Dubai">Dubai (GST)</option>
+                                        <option value="Asia/Shanghai">Shanghai (CST)</option>
+                                        <option value="Asia/Kolkata">Mumbai (IST)</option>
+                                    </select>
+                                </div>
+                                <div class="time-display mt-2" id="fromTimeDisplay"></div>
+                                <div class="date-display" id="fromDateDisplay"></div>
+                            </div>
+                            
+                            <!-- To Time Zone -->
+                            <div class="col-md-6">
+                                <label class="form-label">To:</label>
+                                <div class="input-group">
+                                    <input type="datetime-local" class="form-control" id="toDateTime" readonly>
+                                    <select class="form-select" id="toTimeZone">
+                                        <option value="Europe/London">London (GMT/BST)</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="America/New_York">New York (EST/EDT)</option>
+                                        <option value="Europe/Paris">Paris (CET/CEST)</option>
+                                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                        <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+                                        <option value="Asia/Dubai">Dubai (GST)</option>
+                                        <option value="Asia/Shanghai">Shanghai (CST)</option>
+                                        <option value="Asia/Kolkata">Mumbai (IST)</option>
+                                    </select>
+                                </div>
+                                <div class="time-display mt-2" id="toTimeDisplay"></div>
+                                <div class="date-display" id="toDateDisplay"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Time Difference -->
+                        <div class="text-center mt-3">
+                            <div class="time-difference" id="timeDifference"></div>
+                            <div class="daylight-saving" id="daylightSaving"></div>
+                        </div>
+                        
+                        <!-- Swap Button -->
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary" id="swapBtn">
+                                <i class="fas fa-exchange-alt"></i> Swap Time Zones
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- World Clock -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">World Clock</h5>
+                            <div class="world-clock" id="worldClock">
+                                <!-- Clock cards will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Meeting Planner -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Meeting Planner</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Meeting Time:</label>
+                                <input type="datetime-local" class="form-control" id="meetingTime">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Duration (hours):</label>
+                                <input type="number" class="form-control" id="meetingDuration" value="1" min="0.5" step="0.5">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Participants' Time Zones:</label>
+                                <div class="input-group mb-2">
+                                    <select class="form-select" id="participantTimeZone">
+                                        <option value="UTC">UTC</option>
+                                        <option value="America/New_York">New York (EST/EDT)</option>
+                                        <option value="Europe/London">London (GMT/BST)</option>
+                                        <option value="Europe/Paris">Paris (CET/CEST)</option>
+                                        <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                        <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+                                        <option value="Asia/Dubai">Dubai (GST)</option>
+                                        <option value="Asia/Shanghai">Shanghai (CST)</option>
+                                        <option value="Asia/Kolkata">Mumbai (IST)</option>
+                                    </select>
+                                    <button class="btn btn-outline-primary" id="addParticipant">
+                                        <i class="fas fa-plus"></i> Add
+                                    </button>
+                                </div>
+                                <div id="participantsList">
+                                    <!-- Participant time zones will be added here -->
+                                </div>
+                            </div>
+                            <div id="meetingTimes">
+                                <!-- Meeting times will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromDateTime = document.getElementById('fromDateTime');
+            const toDateTime = document.getElementById('toDateTime');
+            const fromTimeZone = document.getElementById('fromTimeZone');
+            const toTimeZone = document.getElementById('toTimeZone');
+            const swapBtn = document.getElementById('swapBtn');
+            const worldClock = document.getElementById('worldClock');
+            const meetingTime = document.getElementById('meetingTime');
+            const meetingDuration = document.getElementById('meetingDuration');
+            const participantTimeZone = document.getElementById('participantTimeZone');
+            const addParticipant = document.getElementById('addParticipant');
+            const participantsList = document.getElementById('participantsList');
+            const meetingTimes = document.getElementById('meetingTimes');
+            
+            let participants = [];
+            
+            // Function to format date and time
+            function formatDateTime(date, timeZone) {
+                const options = {
+                    timeZone: timeZone,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                };
+                return date.toLocaleTimeString('en-US', options);
+            }
+            
+            // Function to format date
+            function formatDate(date, timeZone) {
+                const options = {
+                    timeZone: timeZone,
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                return date.toLocaleDateString('en-US', options);
+            }
+            
+            // Function to update time display
+            function updateTimeDisplay() {
+                const fromDate = new Date(fromDateTime.value);
+                const fromZone = fromTimeZone.value;
+                const toZone = toTimeZone.value;
+                
+                if (!isNaN(fromDate.getTime())) {
+                    const toDate = new Date(fromDate.toLocaleString('en-US', { timeZone: toZone }));
+                    
+                    // Update displays
+                    document.getElementById('fromTimeDisplay').textContent = formatDateTime(fromDate, fromZone);
+                    document.getElementById('fromDateDisplay').textContent = formatDate(fromDate, fromZone);
+                    document.getElementById('toTimeDisplay').textContent = formatDateTime(toDate, toZone);
+                    document.getElementById('toDateDisplay').textContent = formatDate(toDate, toZone);
+                    
+                    // Update time difference
+                    const diff = (toDate - fromDate) / (1000 * 60 * 60);
+                    const diffDisplay = document.getElementById('timeDifference');
+                    diffDisplay.textContent = `Time Difference: ${diff > 0 ? '+' : ''}${diff.toFixed(1)} hours`;
+                    diffDisplay.className = `time-difference ${diff < 0 ? 'negative' : ''}`;
+                    
+                    // Update daylight saving info
+                    const dstInfo = document.getElementById('daylightSaving');
+                    const fromDst = fromDate.toLocaleString('en-US', { timeZone: fromZone, timeZoneName: 'short' }).split(' ').pop();
+                    const toDst = toDate.toLocaleString('en-US', { timeZone: toZone, timeZoneName: 'short' }).split(' ').pop();
+                    dstInfo.textContent = `${fromZone}: ${fromDst}, ${toZone}: ${toDst}`;
+                }
+            }
+            
+            // Function to update world clock
+            function updateWorldClock() {
+                const timeZones = [
+                    'UTC',
+                    'America/New_York',
+                    'Europe/London',
+                    'Europe/Paris',
+                    'Asia/Tokyo',
+                    'Australia/Sydney',
+                    'Asia/Dubai',
+                    'Asia/Shanghai',
+                    'Asia/Kolkata'
+                ];
+                
+                worldClock.innerHTML = '';
+                
+                timeZones.forEach(zone => {
+                    const now = new Date();
+                    const card = document.createElement('div');
+                    card.className = 'clock-card';
+                    card.innerHTML = `
+                        <div class="clock-time">${formatDateTime(now, zone)}</div>
+                        <div class="clock-date">${formatDate(now, zone)}</div>
+                        <div class="text-muted small">${zone.split('/').pop()}</div>
+                    `;
+                    worldClock.appendChild(card);
+                });
+            }
+            
+            // Function to update meeting times
+            function updateMeetingTimes() {
+                const meetingDate = new Date(meetingTime.value);
+                const duration = parseFloat(meetingDuration.value);
+                
+                if (!isNaN(meetingDate.getTime()) && duration > 0) {
+                    meetingTimes.innerHTML = '';
+                    
+                    participants.forEach(zone => {
+                        const localTime = new Date(meetingDate.toLocaleString('en-US', { timeZone: zone }));
+                        const endTime = new Date(localTime.getTime() + duration * 60 * 60 * 1000);
+                        
+                        const timeCard = document.createElement('div');
+                        timeCard.className = 'meeting-time';
+                        timeCard.innerHTML = `
+                            <div class="fw-bold">${zone.split('/').pop()}</div>
+                            <div>Start: ${formatDateTime(localTime, zone)}</div>
+                            <div>End: ${formatDateTime(endTime, zone)}</div>
+                            <div class="text-muted small">${formatDate(localTime, zone)}</div>
+                        `;
+                        meetingTimes.appendChild(timeCard);
+                    });
+                }
+            }
+            
+            // Event listeners
+            fromDateTime.addEventListener('input', updateTimeDisplay);
+            fromTimeZone.addEventListener('change', updateTimeDisplay);
+            toTimeZone.addEventListener('change', updateTimeDisplay);
+            
+            swapBtn.addEventListener('click', function() {
+                const temp = fromTimeZone.value;
+                fromTimeZone.value = toTimeZone.value;
+                toTimeZone.value = temp;
+                updateTimeDisplay();
+            });
+            
+            addParticipant.addEventListener('click', function() {
+                const zone = participantTimeZone.value;
+                if (!participants.includes(zone)) {
+                    participants.push(zone);
+                    
+                    const participant = document.createElement('div');
+                    participant.className = 'd-flex justify-content-between align-items-center mb-2';
+                    participant.innerHTML = `
+                        <span>${zone.split('/').pop()}</span>
+                        <button class="btn btn-sm btn-outline-danger remove-participant" data-zone="${zone}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    participantsList.appendChild(participant);
+                    
+                    participant.querySelector('.remove-participant').addEventListener('click', function() {
+                        const index = participants.indexOf(zone);
+                        if (index > -1) {
+                            participants.splice(index, 1);
+                            participant.remove();
+                            updateMeetingTimes();
+                        }
+                    });
+                    
+                    updateMeetingTimes();
+                }
+            });
+            
+            meetingTime.addEventListener('input', updateMeetingTimes);
+            meetingDuration.addEventListener('input', updateMeetingTimes);
+            
+            // Initialize
+            const now = new Date();
+            fromDateTime.value = now.toISOString().slice(0, 16);
+            updateTimeDisplay();
+            updateWorldClock();
+            
+            // Update world clock every second
+            setInterval(updateWorldClock, 1000);
+        });
+    </script>
+</body>
+</html> 
