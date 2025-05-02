@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <p class="mb-0">&copy; ${new Date().getFullYear()} iLoveTools. All rights reserved.</p>
                         </div>
                         <div class="col-md-6 text-center text-md-end">
-                            <p class="mb-0">Made with <i class="fas fa-heart text-danger"></i> for developers and creators</p>
+                            <p class="mb-0">Made with <i class="fas fa-heart text-danger"></i> by @Ai for People </p>
                         </div>
                     </div>
                 </div>
@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const email = emailInput.value;
                 
                 if (email && email.includes('@')) {
+                   
                     // In a real application, you would send this to your backend
                     alert('Thank you for subscribing to our newsletter!');
                     emailInput.value = '';
