@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener - iLoveTools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        .url-shortener {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .tool-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .short-url {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+        
+        .original-url {
+            font-size: 0.9rem;
+            color: #6c757d;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+        
+        .btn-copy {
+            border-radius: 20px;
+            padding: 6px 15px;
+            transition: all 0.2s;
+        }
+        
+        .btn-copy:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-copy:active {
+            transform: translateY(0);
+        }
+        
+        .stats-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .stats-icon {
+            margin-right: 10px;
+            width: 24px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+        
+        .qr-code-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            transition: all 0.2s;
+        }
+        
+        .history-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .history-original {
+            color: #6c757d;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .share-icon {
+            font-size: 1.5rem;
+            margin: 0 10px;
+            color: #6c757d;
+            transition: all 0.2s;
+        }
+        
+        .share-icon:hover {
+            transform: scale(1.2);
+        }
+        
+        .facebook:hover { color: #3b5998; }
+        .twitter:hover { color: #1da1f2; }
+        .whatsapp:hover { color: #25d366; }
+        .telegram:hover { color: #0088cc; }
+        
+        .service-logo {
+            height: 20px;
+            margin-right: 5px;
+        }
+        
+        #loadingSpinner {
+            display: none;
+        }
+        
+        .tooltip-inner {
+            max-width: 200px;
+            padding: 5px 10px;
+            background-color: var(--dark-color);
+        }
+        
+        @media (max-width: 576px) {
+            .url-shortener {
+                padding: 20px;
+            }
+            
+            .qr-code {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-4">URL Shortener</h1>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="url-shortener">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-link tool-icon"></i>
+                        <p class="lead">Transform long, unwieldy URLs into concise, shareable links</p>
+                    </div>
+                    
+                    <form id="urlForm">
+                        <div class="mb-3">
+                            <label for="longUrl" class="form-label">Enter your long URL</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                <input type="url" class="form-control" id="longUrl" placeholder="https://example.com/your-very-long-url-that-needs-shortening" required>
+                                <button type="submit" class="btn btn-primary" id="shortenButton">
+                                    <span id="buttonText">Shorten</span>
+                                    <span id="loadingSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                            <div class="form-text">Enter a valid URL including http:// or https://</div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="serviceSelect" class="form-label">Shortening Service</label>
+                                <select class="form-select" id="serviceSelect">
+                                    <option value="tinyurl" selected>TinyURL</option>
+                                    <option value="bitly">Bitly</option>
+                                    <option value="rebrandly">Rebrandly</option>
+                                    <option value="cuttly">Cuttly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="customAlias" class="form-label">Custom Alias (optional)</label>
+                                <input type="text" class="form-control" id="customAlias" placeholder="your-custom-alias" disabled>
+                                <small class="form-text text-muted">Only available with API key</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="trackingCheck">
+                                <label class="form-check-label" for="trackingCheck">
+                                    Enable click tracking and analytics
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-text mb-4">
+                            <i class="fas fa-info-circle me-1"></i> We don't store your original URLs on our servers. All processing happens in your browser.
+                        </div>
+                    </form>
+                    
+                    <div id="resultContainer" style="display: none;">
+                        <div class="result-card">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label class="form-label">Short URL</label>
+                                        <div class="short-url mb-2" id="shortUrl"></div>
+                                        <div class="original-url" id="originalUrl"></div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2 mb-3">
+                                        <button class="btn btn-sm btn-primary btn-copy" id="copyButton" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy to clipboard">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" id="qrButton" data-bs-toggle="tooltip" data-bs-placement="top" title="Show QR Code">
+                                            <i class="fas fa-qrcode me-1"></i> QR Code
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" id="newButton">
+                                            <i class="fas fa-plus me-1"></i> New URL
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Share via</label>
+                                        <div class="d-flex">
+                                            <a href="#" class="share-icon facebook" id="shareFacebook" data-bs-toggle="tooltip" data-bs-placement="top" title="Share on Facebook">
+                                                <i class="fab fa-facebook"></i>
+                                            </a>
+                                            <a href="#" class="share-icon twitter" id="shareTwitter" data-bs-toggle="tooltip" data-bs-placement="top" title="Share on Twitter">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                            <a href="#" class="share-icon whatsapp" id="shareWhatsapp" data-bs-toggle="tooltip" data-bs-placement="top" title="Share on WhatsApp">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </a>
+                                            <a href="#" class="share-icon telegram" id="shareTelegram" data-bs-toggle="tooltip" data-bs-placement="top" title="Share on Telegram">
+                                                <i class="fab fa-telegram"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4" id="qrCodeContainer" style="display: none;">
+                                    <div class="qr-code-container">
+                                        <div id="qrCode" class="qr-code"></div>
+                                        <a href="#" class="btn btn-sm btn-outline-secondary" id="downloadQr">
+                                            <i class="fas fa-download me-1"></i> Download QR
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5><i class="fas fa-history me-2"></i>Recent URLs</h5>
+                        <div id="urlHistory" class="mt-3">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <p>Your shortened URLs will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="url-shortener">
+                    <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>About URL Shortener</h5>
+                    <p>URL shorteners create compact, shareable links that redirect to your original URL. Benefits include:</p>
+                    
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-compress-alt"></i>
+                        </div>
+                        <div>
+                            <strong>Clean Links</strong>: Make URLs more manageable
+                        </div>
+                    </div>
+                    
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <div>
+                            <strong>Sharing</strong>: Easier to share on social media
+                        </div>
+                    </div>
+                    
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>
+                            <strong>Mobile-Friendly</strong>: Better for SMS and messaging
+                        </div>
+                    </div>
+                    
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <strong>Analytics</strong>: Some services offer click tracking
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Security Tips</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Check shortened URLs before clicking using URL preview services
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Be cautious with shortened links from unknown sources
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Use browser extensions that preview shortened URLs
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Elements
+            const urlForm = document.getElementById('urlForm');
+            const longUrlInput = document.getElementById('longUrl');
+            const serviceSelect = document.getElementById('serviceSelect');
+            const customAliasInput = document.getElementById('customAlias');
+            const trackingCheck = document.getElementById('trackingCheck');
+            const shortenButton = document.getElementById('shortenButton');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultContainer = document.getElementById('resultContainer');
+            const shortUrlElement = document.getElementById('shortUrl');
+            const originalUrlElement = document.getElementById('originalUrl');
+            const copyButton = document.getElementById('copyButton');
+            const qrButton = document.getElementById('qrButton');
+            const newButton = document.getElementById('newButton');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrCode = document.getElementById('qrCode');
+            const downloadQr = document.getElementById('downloadQr');
+            const urlHistory = document.getElementById('urlHistory');
+            const shareFacebook = document.getElementById('shareFacebook');
+            const shareTwitter = document.getElementById('shareTwitter');
+            const shareWhatsapp = document.getElementById('shareWhatsapp');
+            const shareTelegram = document.getElementById('shareTelegram');
+            
+            // State
+            let currentShortUrl = '';
+            let currentOriginalUrl = '';
+            let urlHistoryData = JSON.parse(localStorage.getItem('urlShortenerHistory')) || [];
+            
+            // Update history display
+            function updateUrlHistory() {
+                if (urlHistoryData.length === 0) {
+                    urlHistory.innerHTML = `
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>Your shortened URLs will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                urlHistory.innerHTML = '';
+                urlHistoryData.slice(0, 5).forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">${item.shortUrl.replace(/^https?:\/\//, '')}</div>
+                                <div class="history-original">${item.originalUrl}</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary history-copy" data-url="${item.shortUrl}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    `;
+                    urlHistory.appendChild(historyItem);
+                    
+                    // Add event listener to copy button
+                    historyItem.querySelector('.history-copy').addEventListener('click', function() {
+                        const url = this.getAttribute('data-url');
+                        copyToClipboard(url);
+                        showToast('URL copied to clipboard!');
+                    });
+                });
+                
+                // Add clear history button if there are items
+                const clearButton = document.createElement('button');
+                clearButton.className = 'btn btn-sm btn-outline-danger mt-2';
+                clearButton.innerHTML = '<i class="fas fa-trash me-1"></i> Clear History';
+                clearButton.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to clear your URL history?')) {
+                        urlHistoryData = [];
+                        localStorage.setItem('urlShortenerHistory', JSON.stringify(urlHistoryData));
+                        updateUrlHistory();
+                    }
+                });
+                urlHistory.appendChild(clearButton);
+            }
+            
+            // Initialize history
+            updateUrlHistory();
+            
+            // Service change handler
+            serviceSelect.addEventListener('change', function() {
+                const service = this.value;
+                // Enable custom alias for services that support it
+                if (service === 'bitly' || service === 'rebrandly') {
+                    customAliasInput.disabled = false;
+                } else {
+                    customAliasInput.disabled = true;
+                    customAliasInput.value = '';
+                }
+            });
+            
+            // Copy to clipboard function
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(
+                    function() {
+                        /* success */
+                        const tooltip = bootstrap.Tooltip.getInstance(copyButton);
+                        copyButton.setAttribute('data-bs-original-title', 'Copied!');
+                        tooltip.show();
+                        
+                        setTimeout(function() {
+                            copyButton.setAttribute('data-bs-original-title', 'Copy to clipboard');
+                        }, 2000);
+                    },
+                    function() {
+                        /* failure */
+                        alert('Failed to copy to clipboard. Please try manually selecting and copying the URL.');
+                    }
+                );
+            }
+            
+            // Generate QR code
+            function generateQRCode(url) {
+                qrCode.innerHTML = '';
+                QRCode.toCanvas(qrCode, url, {
+                    width: 150,
+                    margin: 1,
+                    color: {
+                        dark: '#000000',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) console.error(error);
+                });
+            }
+            
+            // Show toast notification
+            function showToast(message) {
+                const toastContainer = document.createElement('div');
+                toastContainer.style.position = 'fixed';
+                toastContainer.style.bottom = '20px';
+                toastContainer.style.right = '20px';
+                toastContainer.style.zIndex = '9999';
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast show';
+                toast.role = 'alert';
+                toast.ariaLive = 'assertive';
+                toast.ariaAtomic = 'true';
+                toast.innerHTML = `
+                    <div class="toast-header">
+                        <strong class="me-auto">URL Shortener</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                document.body.appendChild(toastContainer);
+                
+                setTimeout(function() {
+                    toastContainer.remove();
+                }, 3000);
+            }
+            
+            // URL shortening API functions
+            async function shortenWithTinyURL(url) {
+                try {
+                    const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+                    if (!response.ok) throw new Error('Failed to shorten URL');
+                    return await response.text();
+                } catch (error) {
+                    console.error('TinyURL error:', error);
+                    throw error;
+                }
+            }
+            
+            // Simulate other API calls (these would require API keys in a real application)
+            async function shortenWithBitly(url) {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return `https://bit.ly/${Math.random().toString(36).substring(2, 8)}`;
+            }
+            
+            async function shortenWithRebrandly(url) {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return `https://rebrand.ly/${Math.random().toString(36).substring(2, 8)}`;
+            }
+            
+            async function shortenWithCuttly(url) {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                return `https://cutt.ly/${Math.random().toString(36).substring(2, 8)}`;
+            }
+            
+            // Form submission handler
+            urlForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const longUrl = longUrlInput.value.trim();
+                const service = serviceSelect.value;
+                
+                // Validate URL
+                try {
+                    new URL(longUrl);
+                } catch (e) {
+                    alert('Please enter a valid URL including http:// or https://');
+                    return;
+                }
+                
+                // Show loading state
+                buttonText.style.display = 'none';
+                loadingSpinner.style.display = 'inline-block';
+                shortenButton.disabled = true;
+                
+                try {
+                    let shortUrl;
+                    
+                    // Call the appropriate API based on selected service
+                    switch (service) {
+                        case 'tinyurl':
+                            shortUrl = await shortenWithTinyURL(longUrl);
+                            break;
+                        case 'bitly':
+                            shortUrl = await shortenWithBitly(longUrl);
+                            break;
+                        case 'rebrandly':
+                            shortUrl = await shortenWithRebrandly(longUrl);
+                            break;
+                        case 'cuttly':
+                            shortUrl = await shortenWithCuttly(longUrl);
+                            break;
+                        default:
+                            shortUrl = await shortenWithTinyURL(longUrl);
+                    }
+                    
+                    // Update the result
+                    currentShortUrl = shortUrl;
+                    currentOriginalUrl = longUrl;
+                    shortUrlElement.textContent = shortUrl;
+                    originalUrlElement.textContent = longUrl;
+                    resultContainer.style.display = 'block';
+                    
+                    // Generate QR code
+                    generateQRCode(shortUrl);
+                    
+                    // Update sharing links
+                    shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shortUrl)}`;
+                    shareTwitter.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shortUrl)}`;
+                    shareWhatsapp.href = `https://wa.me/?text=${encodeURIComponent(shortUrl)}`;
+                    shareTelegram.href = `https://t.me/share/url?url=${encodeURIComponent(shortUrl)}`;
+                    
+                    // Add to history
+                    const historyItem = {
+                        originalUrl: longUrl,
+                        shortUrl: shortUrl,
+                        service: service,
+                        date: new Date().toISOString()
+                    };
+                    
+                    urlHistoryData.unshift(historyItem);
+                    
+                    // Keep only the last 10 items
+                    if (urlHistoryData.length > 10) {
+                        urlHistoryData = urlHistoryData.slice(0, 10);
+                    }
+                    
+                    // Save to local storage
+                    localStorage.setItem('urlShortenerHistory', JSON.stringify(urlHistoryData));
+                    
+                    // Update history display
+                    updateUrlHistory();
+                    
+                } catch (error) {
+                    console.error('Error shortening URL:', error);
+                    alert('Failed to shorten URL. Please try again or choose a different service.');
+                } finally {
+                    // Reset loading state
+                    buttonText.style.display = 'inline';
+                    loadingSpinner.style.display = 'none';
+                    shortenButton.disabled = false;
+                }
+            });
+            
+            // Copy button handler
+            copyButton.addEventListener('click', function() {
+                copyToClipboard(currentShortUrl);
+            });
+            
+            // QR button handler
+            qrButton.addEventListener('click', function() {
+                if (qrCodeContainer.style.display === 'none') {
+                    qrCodeContainer.style.display = 'block';
+                    qrButton.classList.remove('btn-outline-secondary');
+                    qrButton.classList.add('btn-secondary');
+                } else {
+                    qrCodeContainer.style.display = 'none';
+                    qrButton.classList.remove('btn-secondary');
+                    qrButton.classList.add('btn-outline-secondary');
+                }
+            });
+            
+            // New URL button handler
+            newButton.addEventListener('click', function() {
+                resultContainer.style.display = 'none';
+                qrCodeContainer.style.display = 'none';
+                longUrlInput.value = '';
+                qrButton.classList.remove('btn-secondary');
+                qrButton.classList.add('btn-outline-secondary');
+            });
+            
+            // Download QR code handler
+            downloadQr.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const canvas = qrCode.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = 'qrcode.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }
+            });
+            
+            // Open share links in new window
+            document.querySelectorAll('.share-icon').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.open(this.href, '_blank', 'width=600,height=400');
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

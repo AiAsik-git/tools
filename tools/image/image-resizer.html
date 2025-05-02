@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .resizer-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .drop-zone:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .drop-zone.dragover {
+            border-color: #198754;
+            background-color: rgba(25, 135, 84, 0.05);
+        }
+        .preview-container {
+            position: relative;
+            max-width: 100%;
+            margin: 20px auto;
+        }
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+            display: none;
+        }
+        .dimension-input {
+            width: 100px;
+        }
+        .quality-slider {
+            width: 100%;
+        }
+        .download-btn {
+            width: 100%;
+        }
+        .image-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .aspect-ratio-lock {
+            cursor: pointer;
+        }
+        .aspect-ratio-lock.active {
+            color: #198754;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-image me-2"></i>Image Resizer
+                    </h2>
+                    
+                    <!-- Resizer Section -->
+                    <div class="resizer-card">
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="dropZone">
+                            <div class="mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                <h5>Drag & Drop Image Here</h5>
+                                <p class="text-muted">or</p>
+                                <input type="file" class="form-control" id="fileInput" accept="image/*" style="display: none;">
+                                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Choose File
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview Section -->
+                        <div class="preview-container">
+                            <img id="previewImage" class="preview-image" alt="Preview">
+                            <div class="image-info text-center" id="imageInfo"></div>
+                        </div>
+                        
+                        <!-- Controls -->
+                        <div class="controls mt-4" style="display: none;" id="controls">
+                            <!-- Dimensions -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Width (px)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control dimension-input" id="widthInput" min="1">
+                                        <button class="btn btn-outline-secondary aspect-ratio-lock" id="lockAspectRatio">
+                                            <i class="fas fa-lock"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Height (px)</label>
+                                    <input type="number" class="form-control dimension-input" id="heightInput" min="1">
+                                </div>
+                            </div>
+                            
+                            <!-- Quality -->
+                            <div class="mb-3">
+                                <label class="form-label">Quality</label>
+                                <input type="range" class="form-range quality-slider" id="qualitySlider" min="1" max="100" value="90">
+                                <div class="d-flex justify-content-between">
+                                    <span>Low</span>
+                                    <span id="qualityValue">90%</span>
+                                    <span>High</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Format -->
+                            <div class="mb-3">
+                                <label class="form-label">Output Format</label>
+                                <select class="form-select" id="formatSelect">
+                                    <option value="original">Original Format</option>
+                                    <option value="jpeg">JPEG</option>
+                                    <option value="png">PNG</option>
+                                    <option value="webp">WebP</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Download -->
+                            <button class="btn btn-success download-btn" id="downloadBtn">
+                                <i class="fas fa-download me-2"></i>Download Resized Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const previewImage = document.getElementById('previewImage');
+            const imageInfo = document.getElementById('imageInfo');
+            const controls = document.getElementById('controls');
+            const widthInput = document.getElementById('widthInput');
+            const heightInput = document.getElementById('heightInput');
+            const lockAspectRatio = document.getElementById('lockAspectRatio');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const formatSelect = document.getElementById('formatSelect');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            let originalImage = null;
+            let originalWidth = 0;
+            let originalHeight = 0;
+            let aspectRatio = 0;
+            let isAspectRatioLocked = true;
+            
+            // Handle drag and drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    handleImage(file);
+                }
+            });
+            
+            // Handle file input
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    handleImage(file);
+                }
+            });
+            
+            // Handle image
+            function handleImage(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalImage = new Image();
+                    originalImage.onload = function() {
+                        originalWidth = this.width;
+                        originalHeight = this.height;
+                        aspectRatio = originalWidth / originalHeight;
+                        
+                        // Update preview
+                        previewImage.src = e.target.result;
+                        previewImage.style.display = 'block';
+                        
+                        // Update dimensions
+                        widthInput.value = originalWidth;
+                        heightInput.value = originalHeight;
+                        
+                        // Update info
+                        imageInfo.textContent = `${originalWidth} × ${originalHeight} pixels | ${formatFileSize(file.size)}`;
+                        
+                        // Show controls
+                        controls.style.display = 'block';
+                    };
+                    originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Handle dimension changes
+            widthInput.addEventListener('input', function() {
+                if (isAspectRatioLocked) {
+                    heightInput.value = Math.round(this.value / aspectRatio);
+                }
+                updatePreview();
+            });
+            
+            heightInput.addEventListener('input', function() {
+                if (isAspectRatioLocked) {
+                    widthInput.value = Math.round(this.value * aspectRatio);
+                }
+                updatePreview();
+            });
+            
+            // Handle aspect ratio lock
+            lockAspectRatio.addEventListener('click', function() {
+                isAspectRatioLocked = !isAspectRatioLocked;
+                this.classList.toggle('active');
+                if (isAspectRatioLocked) {
+                    aspectRatio = widthInput.value / heightInput.value;
+                }
+            });
+            
+            // Handle quality slider
+            qualitySlider.addEventListener('input', function() {
+                qualityValue.textContent = this.value + '%';
+            });
+            
+            // Update preview
+            function updatePreview() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = widthInput.value;
+                canvas.height = heightInput.value;
+                
+                ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+                
+                previewImage.src = canvas.toDataURL('image/jpeg', qualitySlider.value / 100);
+            }
+            
+            // Handle download
+            downloadBtn.addEventListener('click', function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = widthInput.value;
+                canvas.height = heightInput.value;
+                
+                ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+                
+                const format = formatSelect.value === 'original' ? 'image/jpeg' : `image/${formatSelect.value}`;
+                const quality = qualitySlider.value / 100;
+                
+                const link = document.createElement('a');
+                link.download = `resized-image.${formatSelect.value}`;
+                link.href = canvas.toDataURL(format, quality);
+                link.click();
+            });
+        });
+    </script>
+</body>
+</html> 

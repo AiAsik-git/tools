@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Excel Converter - Free Online Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <!-- PDF.js library for PDF processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- SheetJS for Excel generation -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --primary-dark: #3955c8;
+            --secondary-color: #6c757d;
+            --background-light: #f8f9fa;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--background-light);
+        }
+
+        .tool-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .drop-zone {
+            padding: 3rem;
+            text-align: center;
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            background-color: var(--background-light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 108, 247, 0.05);
+        }
+
+        .drop-zone .icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .drop-zone p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone .btn {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .drop-zone .btn:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        #file-details {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .file-info {
+            background-color: var(--background-light);
+            padding: 1rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .file-info i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-right: 1rem;
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .config-section {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .config-section h4 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-select, .form-control {
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+        }
+
+        .tables-container {
+            margin-top: 2rem;
+        }
+
+        .table-item {
+            background-color: var(--background-light);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .table-preview {
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .preview-table th, .preview-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+        }
+
+        .preview-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-convert {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-convert:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .progress-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            background-color: rgba(220, 53, 69, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            color: var(--success-color);
+            background-color: rgba(40, 167, 69, 0.1);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .info-card {
+            background-color: rgba(74, 108, 247, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 2rem;
+        }
+
+        .info-card h5 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .page-selector {
+            margin-bottom: 1rem;
+        }
+
+        .page-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-range {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .page-range input {
+            width: 80px;
+        }
+
+        .page-range .form-text {
+            margin-top: 0;
+        }
+
+        @media (max-width: 768px) {
+            .tool-container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+
+            .drop-zone {
+                padding: 2rem 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-convert {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tool-container">
+            <div class="tool-header">
+                <h1><i class="fas fa-file-pdf text-primary me-2"></i> PDF to Excel Converter</h1>
+                <p class="lead">Extract tables from PDF documents and convert them to Excel spreadsheets</p>
+            </div>
+
+            <div class="drop-zone" id="drop-zone">
+                <i class="fas fa-file-pdf icon"></i>
+                <h3>Drop your PDF file here</h3>
+                <p>or</p>
+                <button class="btn" id="file-selector">Select PDF File</button>
+                <input type="file" id="file-input" accept=".pdf" style="display: none;">
+                <p class="mt-3 text-muted">Supports PDF files containing tables</p>
+            </div>
+
+            <div id="error-message" class="error-message">
+                <i class="fas fa-exclamation-circle me-2"></i> <span id="error-text"></span>
+            </div>
+
+            <div id="file-details">
+                <div class="file-info">
+                    <i class="fas fa-file-pdf"></i>
+                    <div>
+                        <div class="file-name" id="file-name"></div>
+                        <div class="file-size" id="file-size"></div>
+                    </div>
+                </div>
+
+                <div class="page-selector">
+                    <div class="page-info">
+                        <h4>PDF Pages</h4>
+                        <div class="page-count" id="page-count">Total pages: 0</div>
+                    </div>
+                    <div class="page-range">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="page-range-option" id="all-pages" checked>
+                            <label class="form-check-label" for="all-pages">
+                                All pages
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="page-range-option" id="selected-pages">
+                            <label class="form-check-label" for="selected-pages">
+                                Page range
+                            </label>
+                        </div>
+                        <input type="number" id="page-from" class="form-control form-control-sm" min="1" value="1" disabled>
+                        <span>to</span>
+                        <input type="number" id="page-to" class="form-control form-control-sm" min="1" value="1" disabled>
+                    </div>
+                </div>
+
+                <div class="progress-container" id="progress-container">
+                    <div class="progress-label">
+                        <span>Processing pages...</span>
+                        <span id="progress-text">0%</span>
+                    </div>
+                    <div class="progress">
+                        <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+                <div class="tables-container" id="tables-container">
+                    <!-- Tables will be displayed here -->
+                </div>
+
+                <div class="action-buttons">
+                    <button id="extract-tables-btn" class="btn btn-convert">
+                        <i class="fas fa-table me-2"></i> Extract Tables
+                    </button>
+                    <button id="convert-btn" class="btn btn-convert" style="display: none;">
+                        <i class="fas fa-file-excel me-2"></i> Convert to Excel
+                    </button>
+                </div>
+
+                <div class="info-card">
+                    <h5><i class="fas fa-shield-alt me-2"></i> Secure Processing</h5>
+                    <p>Your PDF files are processed entirely in your browser. No data is uploaded to any server, 
+                       ensuring complete privacy and security of your information.</p>
+                    <p class="mt-2"><i class="fas fa-info-circle me-2"></i> <strong>Note:</strong> The accuracy of table extraction depends on how well-structured the tables are in your PDF file. Complex layouts or scanned PDFs may result in less accurate extraction.</p>
+                </div>
+            </div>
+
+            <div id="success-message" class="success-message">
+                <i class="fas fa-check-circle me-2"></i> <span id="success-text"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner-border loading-spinner text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script>
+        // Set worker path for PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        // Global variables
+        let pdfDocument = null;
+        let extractedTables = [];
+        
+        // DOM elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileSelector = document.getElementById('file-selector');
+        const fileDetails = document.getElementById('file-details');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        const pageCount = document.getElementById('page-count');
+        const allPages = document.getElementById('all-pages');
+        const selectedPages = document.getElementById('selected-pages');
+        const pageFrom = document.getElementById('page-from');
+        const pageTo = document.getElementById('page-to');
+        const tablesContainer = document.getElementById('tables-container');
+        const extractTablesBtn = document.getElementById('extract-tables-btn');
+        const convertBtn = document.getElementById('convert-btn');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const successMessage = document.getElementById('success-message');
+        const successText = document.getElementById('success-text');
+
+        // Event listeners
+        fileSelector.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', handleFileSelect);
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        allPages.addEventListener('change', () => {
+            if (allPages.checked) {
+                pageFrom.disabled = true;
+                pageTo.disabled = true;
+            }
+        });
+
+        selectedPages.addEventListener('change', () => {
+            if (selectedPages.checked) {
+                pageFrom.disabled = false;
+                pageTo.disabled = false;
+            }
+        });
+
+        extractTablesBtn.addEventListener('click', extractTables);
+        convertBtn.addEventListener('click', convertToExcel);
+
+        // Functions
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length) {
+                handleFiles(files);
+            }
+        }
+
+        function handleFiles(files) {
+            const file = files[0];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            
+            if (fileExtension !== 'pdf') {
+                showError('Invalid file format. Please upload a PDF file.');
+                return;
+            }
+
+            // Show loading
+            loadingOverlay.style.display = 'flex';
+            
+            // Reset UI
+            hideError();
+            hideSuccess();
+            tablesContainer.innerHTML = '';
+            extractedTables = [];
+            convertBtn.style.display = 'none';
+            
+            // Read file
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const typedArray = new Uint8Array(e.target.result);
+                
+                // Load PDF document
+                pdfjsLib.getDocument(typedArray).promise.then(pdf => {
+                    pdfDocument = pdf;
+                    
+                    // Update file details
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    pageCount.textContent = `Total pages: ${pdf.numPages}`;
+                    pageTo.value = pdf.numPages;
+                    pageTo.max = pdf.numPages;
+                    pageFrom.max = pdf.numPages;
+                    
+                    fileDetails.style.display = 'block';
+                    loadingOverlay.style.display = 'none';
+                }).catch(error => {
+                    loadingOverlay.style.display = 'none';
+                    showError('Error loading PDF: ' + error.message);
+                    console.error(error);
+                });
+            };
+            
+            reader.onerror = function() {
+                loadingOverlay.style.display = 'none';
+                showError('Error reading the file. Please try again.');
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function extractTables() {
+            if (!pdfDocument) {
+                showError('Please upload a PDF file first.');
+                return;
+            }
+            
+            // Show progress container
+            progressContainer.style.display = 'block';
+            hideError();
+            hideSuccess();
+            tablesContainer.innerHTML = '';
+            extractedTables = [];
+            convertBtn.style.display = 'none';
+            
+            // Get page range
+            let startPage = 1;
+            let endPage = pdfDocument.numPages;
+            
+            if (selectedPages.checked) {
+                startPage = parseInt(pageFrom.value) || 1;
+                endPage = parseInt(pageTo.value) || pdfDocument.numPages;
+                
+                if (startPage < 1) startPage = 1;
+                if (endPage > pdfDocument.numPages) endPage = pdfDocument.numPages;
+                if (startPage > endPage) {
+                    const temp = startPage;
+                    startPage = endPage;
+                    endPage = temp;
+                }
+            }
+            
+            try {
+                // Loop through pages and extract tables
+                for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
+                    // Update progress
+                    const progress = Math.round(((pageNum - startPage) / (endPage - startPage + 1)) * 100);
+                    progressBar.style.width = `${progress}%`;
+                    progressBar.setAttribute('aria-valuenow', progress);
+                    progressText.textContent = `${progress}%`;
+                    
+                    // Get page
+                    const page = await pdfDocument.getPage(pageNum);
+                    
+                    // Get text content
+                    const textContent = await page.getTextContent();
+                    
+                    // Extract tables from the text content
+                    const tablesFromPage = extractTablesFromTextContent(textContent, pageNum);
+                    
+                    if (tablesFromPage.length > 0) {
+                        extractedTables = [...extractedTables, ...tablesFromPage];
+                    }
+                }
+                
+                // Display extracted tables
+                displayExtractedTables();
+                
+                // Complete progress
+                progressBar.style.width = '100%';
+                progressBar.setAttribute('aria-valuenow', 100);
+                progressText.textContent = '100%';
+                
+                if (extractedTables.length === 0) {
+                    showError('No tables found in the selected pages. Try different pages or a different PDF file.');
+                } else {
+                    convertBtn.style.display = 'block';
+                    showSuccess(`${extractedTables.length} table(s) extracted successfully.`);
+                }
+            } catch (error) {
+                showError('Error extracting tables: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        function extractTablesFromTextContent(textContent, pageNum) {
+            const items = textContent.items;
+            if (items.length === 0) return [];
+            
+            // Group text items by their y-position (rows)
+            const rows = {};
+            let minY = Infinity;
+            let maxY = -Infinity;
+            
+            // Find the line height by analyzing the y-positions
+            const yPositions = [];
+            items.forEach(item => {
+                yPositions.push(Math.round(item.transform[5]));
+            });
+            
+            // Sort y-positions and find the most common difference
+            yPositions.sort((a, b) => a - b);
+            const yDiffs = {};
+            for (let i = 1; i < yPositions.length; i++) {
+                const diff = yPositions[i] - yPositions[i-1];
+                if (diff > 0 && diff < 20) { // Reasonable line height
+                    yDiffs[diff] = (yDiffs[diff] || 0) + 1;
+                }
+            }
+            
+            // Find the most common line height
+            let lineHeight = 0;
+            let maxCount = 0;
+            for (const diff in yDiffs) {
+                if (yDiffs[diff] > maxCount) {
+                    maxCount = yDiffs[diff];
+                    lineHeight = parseInt(diff);
+                }
+            }
+            
+            // If we couldn't determine line height, use a default value
+            if (lineHeight === 0) lineHeight = 12;
+            
+            // Group items by rows with a tolerance of half line height
+            items.forEach(item => {
+                const y = Math.round(item.transform[5]);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+                
+                // Find the closest row
+                let rowY = null;
+                for (const key in rows) {
+                    const rowKeyY = parseInt(key);
+                    if (Math.abs(rowKeyY - y) <= lineHeight / 2) {
+                        rowY = key;
+                        break;
+                    }
+                }
+                
+                if (rowY === null) {
+                    rowY = y;
+                    rows[rowY] = [];
+                }
+                
+                rows[rowY].push(item);
+            });
+            
+            // Sort items in each row by x-position
+            for (const y in rows) {
+                rows[y].sort((a, b) => a.transform[4] - b.transform[4]);
+            }
+            
+            // Find column boundaries by analyzing x-positions
+            const xPositions = [];
+            items.forEach(item => {
+                xPositions.push(Math.round(item.transform[4]));
+                xPositions.push(Math.round(item.transform[4] + item.width));
+            });
+            
+            xPositions.sort((a, b) => a - b);
+            
+            // Find gaps between columns
+            const gaps = [];
+            let lastPos = xPositions[0];
+            for (let i = 1; i < xPositions.length; i++) {
+                const gap = xPositions[i] - lastPos;
+                if (gap > 5) { // Minimum gap between columns
+                    gaps.push({ start: lastPos, end: xPositions[i], gap });
+                }
+                lastPos = xPositions[i];
+            }
+            
+            // Sort gaps by size and take the largest ones as column boundaries
+            gaps.sort((a, b) => b.gap - a.gap);
+            const columnBoundaries = [0]; // Start with 0
+            const numCols = Math.min(10, Math.max(2, gaps.length / 3)); // Estimate number of columns
+            
+            for (let i = 0; i < numCols - 1 && i < gaps.length; i++) {
+                columnBoundaries.push(gaps[i].start);
+            }
+            
+            columnBoundaries.push(1000); // End with a large number
+            columnBoundaries.sort((a, b) => a - b);
+            
+            // Create a 2D array for the table
+            const sortedRowKeys = Object.keys(rows).map(Number).sort((a, b) => b - a); // Sort top to bottom
+            const tableData = [];
+            
+            sortedRowKeys.forEach(y => {
+                const rowItems = rows[y];
+                const row = [];
+                
+                // Assign items to columns
+                for (let i = 0; i < columnBoundaries.length - 1; i++) {
+                    const startX = columnBoundaries[i];
+                    const endX = columnBoundaries[i + 1];
+                    
+                    // Find items that belong to this column
+                    const colItems = rowItems.filter(item => {
+                        const itemX = Math.round(item.transform[4]);
+                        return itemX >= startX && itemX < endX;
+                    });
+                    
+                    // Combine text of all items in this column
+                    const cell = colItems.map(item => item.str).join(' ').trim();
+                    row.push(cell);
+                }
+                
+                if (row.some(cell => cell !== '')) {
+                    tableData.push(row);
+                }
+            });
+            
+            // Filter out rows that don't look like part of a table
+            // (e.g., rows with only one non-empty cell)
+            const filteredTable = tableData.filter(row => {
+                const nonEmptyCells = row.filter(cell => cell !== '').length;
+                return nonEmptyCells > 1;
+            });
+            
+            if (filteredTable.length < 2) {
+                return []; // Not enough rows to be a table
+            }
+            
+            // Determine the number of columns based on the rows with the most cells
+            const maxCols = Math.max(...filteredTable.map(row => row.length));
+            
+            // Normalize table to have the same number of columns in each row
+            const normalizedTable = filteredTable.map(row => {
+                while (row.length < maxCols) {
+                    row.push('');
+                }
+                return row.slice(0, maxCols);
+            });
+            
+            return [{
+                pageNum,
+                data: normalizedTable,
+                numRows: normalizedTable.length,
+                numCols: maxCols
+            }];
+        }
+
+        function displayExtractedTables() {
+            tablesContainer.innerHTML = '';
+            
+            if (extractedTables.length === 0) {
+                return;
+            }
+            
+            extractedTables.forEach((table, index) => {
+                const tableDiv = document.createElement('div');
+                tableDiv.className = 'table-item';
+                
+                const tableHeader = document.createElement('div');
+                tableHeader.className = 'table-header';
+                
+                const tableTitle = document.createElement('div');
+                tableTitle.className = 'table-title';
+                tableTitle.textContent = `Table ${index + 1} (Page ${table.pageNum})`;
+                
+                const tableActions = document.createElement('div');
+                tableActions.className = 'table-actions';
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'btn btn-sm btn-primary';
+                downloadBtn.innerHTML = '<i class="fas fa-file-excel me-1"></i> Download';
+                downloadBtn.addEventListener('click', () => {
+                    downloadSingleTable(table, index);
+                });
+                
+                tableActions.appendChild(downloadBtn);
+                tableHeader.appendChild(tableTitle);
+                tableHeader.appendChild(tableActions);
+                tableDiv.appendChild(tableHeader);
+                
+                const tablePreview = document.createElement('div');
+                tablePreview.className = 'table-preview';
+                
+                const previewTable = document.createElement('table');
+                previewTable.className = 'preview-table';
+                
+                // Create table headers using first row
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                // First row as headers
+                table.data[0].forEach(cell => {
+                    const th = document.createElement('th');
+                    th.textContent = cell || '';
+                    headerRow.appendChild(th);
+                });
+                
+                thead.appendChild(headerRow);
+                previewTable.appendChild(thead);
+                
+                // Create table body rows
+                const tbody = document.createElement('tbody');
+                
+                for (let i = 1; i < table.data.length; i++) {
+                    const tr = document.createElement('tr');
+                    
+                    table.data[i].forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell || '';
+                        tr.appendChild(td);
+                    });
+                    
+                    tbody.appendChild(tr);
+                }
+                
+                previewTable.appendChild(tbody);
+                tablePreview.appendChild(previewTable);
+                tableDiv.appendChild(tablePreview);
+                
+                tablesContainer.appendChild(tableDiv);
+            });
+        }
+
+        function downloadSingleTable(table, index) {
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Convert table data to worksheet
+            const ws = XLSX.utils.aoa_to_sheet(table.data);
+            
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, `Table_${index + 1}`);
+            
+            // Generate filename
+            const fileNameWithoutExt = fileName.textContent.split('.').slice(0, -1).join('.');
+            const excelFileName = `${fileNameWithoutExt}_Table_${index + 1}.xlsx`;
+            
+            // Save Excel file
+            XLSX.writeFile(wb, excelFileName);
+        }
+
+        function convertToExcel() {
+            if (extractedTables.length === 0) {
+                showError('No tables to convert. Please extract tables first.');
+                return;
+            }
+            
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Add each table as a separate worksheet
+            extractedTables.forEach((table, index) => {
+                const ws = XLSX.utils.aoa_to_sheet(table.data);
+                XLSX.utils.book_append_sheet(wb, ws, `Table_${index + 1}`);
+            });
+            
+            // Generate filename
+            const fileNameWithoutExt = fileName.textContent.split('.').slice(0, -1).join('.');
+            const excelFileName = `${fileNameWithoutExt}.xlsx`;
+            
+            // Save Excel file
+            XLSX.writeFile(wb, excelFileName);
+            
+            showSuccess(`Successfully converted ${extractedTables.length} table(s) to Excel.`);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successText.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function hideSuccess() {
+            successMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

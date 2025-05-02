@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text - Online Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --primary-light: #e8edff;
+            --recording-color: #ff4a4a;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --bg-light: #f8f9fa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tool-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 15px;
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px;
+            font-weight: 600;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .mic-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 0;
+        }
+        
+        .mic-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+        
+        .mic-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .mic-button i {
+            font-size: 40px;
+            color: var(--primary-color);
+        }
+        
+        .mic-button.recording {
+            background-color: var(--recording-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .mic-button.recording i {
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 74, 74, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 74, 74, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 74, 74, 0);
+            }
+        }
+        
+        .status-text {
+            font-size: 18px;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .control-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-light);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .control-label {
+            margin-right: 10px;
+            font-weight: 500;
+        }
+        
+        .output-container {
+            padding: 20px;
+            background-color: var(--bg-light);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .output-text {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px 0;
+            white-space: pre-wrap;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .interim {
+            color: gray;
+            font-style: italic;
+        }
+        
+        .word-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #6c757d;
+            background-color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .action-btn {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .feature-card {
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .feature-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-light);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon i {
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .language-select {
+            border-radius: 20px;
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .control-item {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container tool-container">
+        <h1 class="text-center mb-4">Speech to Text Converter</h1>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-microphone me-2"></i> Voice Recognition
+            </div>
+            <div class="card-body">
+                <div class="mic-container">
+                    <button id="micButton" class="mic-button">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <p id="statusText" class="status-text">Click the microphone to start</p>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-item">
+                        <span class="control-label">Language:</span>
+                        <select id="languageSelect" class="language-select">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Spanish</option>
+                            <option value="fr-FR">French</option>
+                            <option value="de-DE">German</option>
+                            <option value="it-IT">Italian</option>
+                            <option value="pt-BR">Portuguese</option>
+                            <option value="ru-RU">Russian</option>
+                            <option value="zh-CN">Chinese</option>
+                            <option value="ja-JP">Japanese</option>
+                            <option value="ko-KR">Korean</option>
+                            <option value="hi-IN">Hindi</option>
+                        </select>
+                    </div>
+                    <div class="control-item">
+                        <span class="control-label">Continuous:</span>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="continuousSwitch" checked>
+                        </div>
+                    </div>
+                    <div class="control-item">
+                        <span class="control-label">Interim Results:</span>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="interimSwitch" checked>
+                        </div>
+                    </div>
+                    <div class="control-item">
+                        <span class="control-label">Auto Punctuation:</span>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="punctuationSwitch">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="output-container">
+                    <div id="outputText" class="output-text"></div>
+                    <div id="wordCount" class="word-count">0 words</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="copyBtn" class="action-btn">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button id="clearBtn" class="action-btn">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <button id="downloadBtn" class="action-btn">
+                        <i class="fas fa-download"></i> Download as TXT
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-2"></i> Features
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3 class="feature-title">Real-time Transcription</h3>
+                            <p>See your speech converted to text instantly as you speak, with support for continuous recognition.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <h3 class="feature-title">Multilingual Support</h3>
+                            <p>Transcribe speech in multiple languages including English, Spanish, French, German, and more.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <h3 class="feature-title">Customizable Settings</h3>
+                            <p>Adjust recognition settings like continuous mode, interim results, and auto-punctuation to suit your needs.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-file-export"></i>
+                            </div>
+                            <h3 class="feature-title">Export Options</h3>
+                            <p>Easily copy your transcribed text to clipboard or download it as a text file for further use.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h3 class="feature-title">Privacy Focused</h3>
+                            <p>All speech processing happens directly in your browser - no data is sent to external servers.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-hands-free"></i>
+                            </div>
+                            <h3 class="feature-title">Hands-free Input</h3>
+                            <p>Perfect for drafting documents, notes, or messages without typing, especially when you're multitasking.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i> This tool uses your browser's built-in Speech Recognition API. Functionality and accuracy may vary depending on your browser and device. For best results, use Chrome or Edge in a quiet environment.
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if browser supports speech recognition
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Your browser does not support speech recognition. Please try Chrome or Edge.');
+                document.getElementById('micButton').disabled = true;
+                document.getElementById('statusText').textContent = 'Speech recognition not supported';
+                return;
+            }
+            
+            // Set up speech recognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            
+            // DOM elements
+            const micButton = document.getElementById('micButton');
+            const statusText = document.getElementById('statusText');
+            const outputText = document.getElementById('outputText');
+            const wordCount = document.getElementById('wordCount');
+            const languageSelect = document.getElementById('languageSelect');
+            const continuousSwitch = document.getElementById('continuousSwitch');
+            const interimSwitch = document.getElementById('interimSwitch');
+            const punctuationSwitch = document.getElementById('punctuationSwitch');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            // Initial config
+            let isRecording = false;
+            let finalTranscript = '';
+            let interimTranscript = '';
+            
+            // Set initial recognition properties
+            recognition.continuous = continuousSwitch.checked;
+            recognition.interimResults = interimSwitch.checked;
+            recognition.lang = languageSelect.value;
+            
+            // Handle mic button click
+            micButton.addEventListener('click', toggleRecognition);
+            
+            function toggleRecognition() {
+                if (isRecording) {
+                    stopRecognition();
+                } else {
+                    startRecognition();
+                }
+            }
+            
+            function startRecognition() {
+                try {
+                    recognition.continuous = continuousSwitch.checked;
+                    recognition.interimResults = interimSwitch.checked;
+                    recognition.lang = languageSelect.value;
+                    
+                    recognition.start();
+                    isRecording = true;
+                    micButton.classList.add('recording');
+                    statusText.textContent = 'Listening...';
+                } catch (error) {
+                    console.error('Error starting recognition:', error);
+                    statusText.textContent = 'Error starting. Try again.';
+                }
+            }
+            
+            function stopRecognition() {
+                recognition.stop();
+                isRecording = false;
+                micButton.classList.remove('recording');
+                statusText.textContent = 'Click the microphone to start';
+            }
+            
+            // Handle recognition events
+            recognition.onresult = function(event) {
+                interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        let transcript = event.results[i][0].transcript;
+                        
+                        // Apply auto-punctuation if enabled
+                        if (punctuationSwitch.checked) {
+                            transcript = applyAutoPunctuation(transcript);
+                        }
+                        
+                        // Add space if the final transcript isn't empty
+                        if (finalTranscript && !finalTranscript.endsWith(' ')) {
+                            finalTranscript += ' ';
+                        }
+                        
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                // Update the output
+                updateOutput();
+            };
+            
+            // Apply basic auto-punctuation
+            function applyAutoPunctuation(text) {
+                // Capitalize first letter of sentences
+                text = text.replace(/(^\s*\w|[.!?]\s*\w)/g, function(match) {
+                    return match.toUpperCase();
+                });
+                
+                // Add periods at natural pauses if they don't already end with punctuation
+                if (!text.match(/[.!?,;:]$/)) {
+                    text += '.';
+                }
+                
+                return text;
+            }
+            
+            function updateOutput() {
+                // Display final transcript
+                let displayText = finalTranscript;
+                
+                // Add interim transcript if available
+                if (interimTranscript) {
+                    displayText += '<span class="interim">' + interimTranscript + '</span>';
+                }
+                
+                // Update output and word count
+                outputText.innerHTML = displayText || 'Your transcribed text will appear here...';
+                updateWordCount();
+            }
+            
+            function updateWordCount() {
+                const text = finalTranscript.trim();
+                const count = text ? text.split(/\s+/).length : 0;
+                wordCount.textContent = count + (count === 1 ? ' word' : ' words');
+            }
+            
+            // Handle recognition end
+            recognition.onend = function() {
+                if (isRecording) {
+                    // If still in recording mode but recognition ended, restart it
+                    // This happens when there's a pause in speech
+                    if (continuousSwitch.checked) {
+                        recognition.start();
+                    } else {
+                        stopRecognition();
+                    }
+                }
+            };
+            
+            // Handle recognition errors
+            recognition.onerror = function(event) {
+                console.error('Recognition error:', event.error);
+                let errorMessage = 'Error: ';
+                
+                switch (event.error) {
+                    case 'no-speech':
+                        errorMessage += 'No speech detected. Try again.';
+                        break;
+                    case 'aborted':
+                        errorMessage = 'Recognition aborted.';
+                        break;
+                    case 'audio-capture':
+                        errorMessage += 'No microphone detected.';
+                        break;
+                    case 'not-allowed':
+                        errorMessage += 'Microphone access denied.';
+                        break;
+                    default:
+                        errorMessage += event.error;
+                }
+                
+                statusText.textContent = errorMessage;
+                stopRecognition();
+            };
+            
+            // Settings event listeners
+            languageSelect.addEventListener('change', function() {
+                if (isRecording) {
+                    stopRecognition();
+                    startRecognition();
+                }
+            });
+            
+            continuousSwitch.addEventListener('change', function() {
+                recognition.continuous = this.checked;
+                if (isRecording) {
+                    stopRecognition();
+                    startRecognition();
+                }
+            });
+            
+            interimSwitch.addEventListener('change', function() {
+                recognition.interimResults = this.checked;
+                if (isRecording) {
+                    stopRecognition();
+                    startRecognition();
+                }
+            });
+            
+            // Button functions
+            copyBtn.addEventListener('click', function() {
+                if (finalTranscript) {
+                    navigator.clipboard.writeText(finalTranscript)
+                        .then(() => {
+                            const originalText = copyBtn.innerHTML;
+                            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                            setTimeout(() => {
+                                copyBtn.innerHTML = originalText;
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy text: ', err);
+                            alert('Failed to copy text. Please try again.');
+                        });
+                }
+            });
+            
+            clearBtn.addEventListener('click', function() {
+                finalTranscript = '';
+                interimTranscript = '';
+                updateOutput();
+            });
+            
+            downloadBtn.addEventListener('click', function() {
+                if (finalTranscript) {
+                    const blob = new Blob([finalTranscript], {type: 'text/plain'});
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    
+                    // Create filename with date
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0];
+                    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                    
+                    a.href = url;
+                    a.download = `transcription_${dateStr}_${timeStr}.txt`;
+                    a.click();
+                    
+                    URL.revokeObjectURL(url);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

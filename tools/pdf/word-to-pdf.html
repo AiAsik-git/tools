@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word to PDF - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- docx.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.32.2/docxtemplater.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.3/pizzip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.3/pizzip-utils.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        .converter-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .drop-zone:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .drop-zone.dragover {
+            border-color: #198754;
+            background-color: rgba(25, 135, 84, 0.05);
+        }
+        .preview-container {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .document-content {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .progress-bar {
+            transition: width 0.3s;
+        }
+        .conversion-options {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .document-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            display: none;
+        }
+        .file-type-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .file-type-word {
+            background-color: #2b579a;
+            color: white;
+        }
+        .file-type-pdf {
+            background-color: #f40f02;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-file-word me-2"></i>Word to PDF
+                    </h2>
+                    
+                    <!-- Converter Section -->
+                    <div class="converter-card">
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="dropZone">
+                            <div class="mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                <h5>Drag & Drop Word Document Here</h5>
+                                <p class="text-muted">Supported formats: .docx</p>
+                                <p class="text-muted">or</p>
+                                <input type="file" class="form-control" id="fileInput" accept=".docx">
+                            </div>
+                        </div>
+                        
+                        <!-- Document Info -->
+                        <div class="document-info" id="documentInfo">
+                            <div class="d-flex align-items-center">
+                                <div class="file-type-badge file-type-word">DOCX</div>
+                                <div>
+                                    <h6 class="mb-0" id="fileName">document.docx</h6>
+                                    <small class="text-muted" id="fileSize">0 KB</small>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Ready for conversion</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     id="progressBar" 
+                                     style="width: 0%">
+                                </div>
+                            </div>
+                            <p class="text-center mt-2" id="progressText">Processing...</p>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div class="preview-container" id="previewContainer" style="display:none;">
+                            <div class="document-content" id="documentContent"></div>
+                        </div>
+                        
+                        <!-- Conversion Options -->
+                        <div class="conversion-options">
+                            <!-- Page Settings -->
+                            <div class="mb-3">
+                                <label class="form-label">Page Size</label>
+                                <select class="form-select" id="pageSizeSelect">
+                                    <option value="a4">A4</option>
+                                    <option value="letter">Letter</option>
+                                    <option value="legal">Legal</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Orientation -->
+                            <div class="mb-3">
+                                <label class="form-label">Orientation</label>
+                                <select class="form-select" id="orientationSelect">
+                                    <option value="portrait">Portrait</option>
+                                    <option value="landscape">Landscape</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Margins -->
+                            <div class="mb-3">
+                                <label class="form-label">Margins (mm)</label>
+                                <div class="d-flex gap-2">
+                                    <input type="number" class="form-control" id="marginsInput" value="10" min="0" max="50">
+                                </div>
+                            </div>
+                            
+                            <!-- Convert Button -->
+                            <button class="btn btn-primary w-100" id="convertBtn" disabled>
+                                <i class="fas fa-file-pdf me-2"></i>Convert to PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const documentInfo = document.getElementById('documentInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const previewContainer = document.getElementById('previewContainer');
+            const documentContent = document.getElementById('documentContent');
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            const orientationSelect = document.getElementById('orientationSelect');
+            const marginsInput = document.getElementById('marginsInput');
+            const convertBtn = document.getElementById('convertBtn');
+            
+            let currentFile = null;
+            
+            // Handle drag and drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+            
+            // Handle file input
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handleFile(this.files[0]);
+                }
+            });
+            
+            // Handle file
+            function handleFile(file) {
+                if (!file.name.endsWith('.docx')) {
+                    alert('Please upload a valid Word document (.docx)');
+                    return;
+                }
+                
+                currentFile = file;
+                
+                // Update document info
+                documentInfo.style.display = 'block';
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                
+                // Enable convert button
+                convertBtn.disabled = false;
+                
+                // Read file for preview
+                readWordDocument(file);
+            }
+            
+            // Read Word document
+            function readWordDocument(file) {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = 'Reading document...';
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        const zip = new PizZip(content);
+                        const doc = new docxtemplater().loadZip(zip);
+                        
+                        // Extract text content (simplified)
+                        const text = doc.getFullText();
+                        
+                        // Convert XML content to HTML (simplified)
+                        let htmlContent = '';
+                        if (zip.files['word/document.xml']) {
+                            const xml = zip.files['word/document.xml'].asText();
+                            // This is a simplified version - a real parser would be more complex
+                            const paragraphs = xml.match(/<w:p.*?<\/w:p>/g) || [];
+                            
+                            htmlContent = paragraphs.map(p => {
+                                // Extract text from paragraph, removing XML tags
+                                const text = p.replace(/<.*?>/g, '')
+                                    .replace(/&lt;/g, '<')
+                                    .replace(/&gt;/g, '>')
+                                    .replace(/&amp;/g, '&')
+                                    .trim();
+                                return text ? `<p>${text}</p>` : '';
+                            }).join('');
+                        }
+                        
+                        // Display preview
+                        documentContent.innerHTML = htmlContent || '<p>Preview not available. Click "Convert to PDF" to process the document.</p>';
+                        previewContainer.style.display = 'block';
+                        
+                        progressContainer.style.display = 'none';
+                    } catch (error) {
+                        console.error('Error reading Word document:', error);
+                        documentContent.innerHTML = '<p>Failed to parse document. The file may be corrupted or unsupported.</p>';
+                        previewContainer.style.display = 'block';
+                        progressContainer.style.display = 'none';
+                    }
+                };
+                
+                reader.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                    }
+                };
+                
+                reader.onerror = function() {
+                    documentContent.innerHTML = '<p>Error reading file.</p>';
+                    previewContainer.style.display = 'block';
+                    progressContainer.style.display = 'none';
+                };
+                
+                reader.readAsBinaryString(file);
+            }
+            
+            // Convert to PDF
+            convertBtn.addEventListener('click', function() {
+                if (!currentFile) return;
+                
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = 'Converting to PDF...';
+                
+                const pageSize = pageSizeSelect.value;
+                const orientation = orientationSelect.value;
+                const margins = Number(marginsInput.value);
+                
+                setTimeout(() => {
+                    // This is where we would normally use a server-side conversion
+                    // Since we're doing client-side, we'll use html2pdf on the preview content
+                    
+                    const element = documentContent;
+                    const options = {
+                        margin: margins,
+                        filename: currentFile.name.replace('.docx', '.pdf'),
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2 },
+                        jsPDF: { unit: 'mm', format: pageSize, orientation: orientation }
+                    };
+                    
+                    progressBar.style.width = '50%';
+                    progressText.textContent = 'Generating PDF...';
+                    
+                    html2pdf().from(element).set(options).save().then(() => {
+                        progressBar.style.width = '100%';
+                        progressText.textContent = 'PDF generated successfully!';
+                        
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                        }, 2000);
+                    });
+                }, 500);
+            });
+            
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Reverser - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-exchange-alt me-2"></i>Text Reverser
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <label for="textInput" class="form-label">Enter your text:</label>
+                        <textarea class="form-control" id="textInput" rows="10" placeholder="Type or paste your text here..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                        <button class="btn btn-primary" id="reverseTextBtn">
+                            <i class="fas fa-undo me-2"></i>Reverse Text
+                        </button>
+                        <button class="btn btn-primary" id="reverseWordsBtn">
+                            <i class="fas fa-random me-2"></i>Reverse Words
+                        </button>
+                        <button class="btn btn-primary" id="reverseLinesBtn">
+                            <i class="fas fa-arrows-alt-v me-2"></i>Reverse Lines
+                        </button>
+                        <button class="btn btn-primary" id="reverseLettersBtn">
+                            <i class="fas fa-text-width me-2"></i>Reverse Letters
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="outputText" class="form-label">Result:</label>
+                        <textarea class="form-control" id="outputText" rows="10" readonly></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-success" id="copyBtn" disabled>
+                            <i class="fas fa-copy me-2"></i>Copy Result
+                        </button>
+                        <button class="btn btn-danger" id="clearBtn">
+                            <i class="fas fa-trash me-2"></i>Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const textInput = document.getElementById('textInput');
+            const outputText = document.getElementById('outputText');
+            const reverseTextBtn = document.getElementById('reverseTextBtn');
+            const reverseWordsBtn = document.getElementById('reverseWordsBtn');
+            const reverseLinesBtn = document.getElementById('reverseLinesBtn');
+            const reverseLettersBtn = document.getElementById('reverseLettersBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            
+            // Function to reverse the entire text
+            function reverseText(text) {
+                return text.split('').reverse().join('');
+            }
+            
+            // Function to reverse the order of words
+            function reverseWords(text) {
+                return text.split(/\s+/).reverse().join(' ');
+            }
+            
+            // Function to reverse the order of lines
+            function reverseLines(text) {
+                return text.split('\n').reverse().join('\n');
+            }
+            
+            // Function to reverse letters in each word
+            function reverseLetters(text) {
+                return text.split(/\b/).map(word => {
+                    return /^\w+$/.test(word) ? word.split('').reverse().join('') : word;
+                }).join('');
+            }
+            
+            // Function to update the output
+            function updateOutput(result) {
+                outputText.value = result;
+                copyBtn.disabled = !result;
+            }
+            
+            // Event listeners for reverse buttons
+            reverseTextBtn.addEventListener('click', function() {
+                updateOutput(reverseText(textInput.value));
+            });
+            
+            reverseWordsBtn.addEventListener('click', function() {
+                updateOutput(reverseWords(textInput.value));
+            });
+            
+            reverseLinesBtn.addEventListener('click', function() {
+                updateOutput(reverseLines(textInput.value));
+            });
+            
+            reverseLettersBtn.addEventListener('click', function() {
+                updateOutput(reverseLetters(textInput.value));
+            });
+            
+            // Copy button functionality
+            copyBtn.addEventListener('click', function() {
+                outputText.select();
+                document.execCommand('copy');
+                
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+            
+            // Clear button functionality
+            clearBtn.addEventListener('click', function() {
+                textInput.value = '';
+                outputText.value = '';
+                copyBtn.disabled = true;
+            });
+        });
+    </script>
+</body>
+</html> 

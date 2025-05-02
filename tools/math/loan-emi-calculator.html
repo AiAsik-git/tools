@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan EMI Calculator - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .payment-chart {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg, 
+                #3498db 0%, 
+                #e74c3c 100%
+            );
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .payment-marker {
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background-color: #000;
+            top: -5px;
+            transform: translateX(-50%);
+        }
+        .payment-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+        .amortization-table {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .amortization-table table {
+            font-size: 0.9rem;
+        }
+        .amortization-table th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-calculator me-2"></i>Loan EMI Calculator
+                    </h2>
+                    
+                    <!-- Loan Details -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="loanAmount" class="form-label">Loan Amount:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="loanAmount" placeholder="Enter loan amount">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="interestRate" class="form-label">Annual Interest Rate:</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="interestRate" placeholder="Enter interest rate">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="loanTerm" class="form-label">Loan Term:</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="loanTerm" placeholder="Enter loan term">
+                                <select class="form-select" id="termUnit">
+                                    <option value="years">Years</option>
+                                    <option value="months">Months</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="startDate" class="form-label">Start Date:</label>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                    </div>
+                    
+                    <!-- Calculate Button -->
+                    <div class="d-grid mb-4">
+                        <button class="btn btn-primary" id="calculateBtn">
+                            <i class="fas fa-calculator me-2"></i>Calculate EMI
+                        </button>
+                    </div>
+                    
+                    <!-- Results -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Loan Summary</h5>
+                            
+                            <!-- EMI Details -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-subtitle mb-2 text-muted">Monthly Payment</h6>
+                                            <h3 id="monthlyPayment" class="display-6 fw-bold">$0.00</h3>
+                                            <p class="text-muted small mb-0">EMI Amount</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-subtitle mb-2 text-muted">Total Interest</h6>
+                                            <h3 id="totalInterest" class="display-6 fw-bold">$0.00</h3>
+                                            <p class="text-muted small mb-0">Interest Payable</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-subtitle mb-2 text-muted">Total Payment</h6>
+                                            <h3 id="totalPayment" class="display-6 fw-bold">$0.00</h3>
+                                            <p class="text-muted small mb-0">Principal + Interest</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Breakdown Chart -->
+                            <div class="position-relative mb-4">
+                                <div class="payment-chart"></div>
+                                <div id="paymentMarker" class="payment-marker" style="left: 0%;"></div>
+                                <div class="payment-labels">
+                                    <span>Principal</span>
+                                    <span>Interest</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Amortization Schedule -->
+                            <div class="mb-4">
+                                <h6 class="card-subtitle mb-2">Amortization Schedule</h6>
+                                <div class="amortization-table">
+                                    <table class="table table-sm table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Payment #</th>
+                                                <th>Date</th>
+                                                <th>Payment</th>
+                                                <th>Principal</th>
+                                                <th>Interest</th>
+                                                <th>Balance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="amortizationTable">
+                                            <!-- Amortization schedule will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Download Schedule -->
+                            <div class="d-grid">
+                                <button class="btn btn-success" id="downloadBtn">
+                                    <i class="fas fa-download me-2"></i>Download Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const paymentMarker = document.getElementById('paymentMarker');
+            
+            // Function to calculate EMI
+            function calculateEMI(principal, annualRate, termYears) {
+                const monthlyRate = annualRate / 12 / 100;
+                const termMonths = termYears * 12;
+                const emi = principal * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / (Math.pow(1 + monthlyRate, termMonths) - 1);
+                return emi;
+            }
+            
+            // Function to generate amortization schedule
+            function generateAmortizationSchedule(principal, annualRate, termYears, startDate) {
+                const monthlyRate = annualRate / 12 / 100;
+                const termMonths = termYears * 12;
+                const emi = calculateEMI(principal, annualRate, termYears);
+                let balance = principal;
+                const schedule = [];
+                let currentDate = new Date(startDate);
+                
+                for (let i = 1; i <= termMonths; i++) {
+                    const interest = balance * monthlyRate;
+                    const principalPayment = emi - interest;
+                    balance -= principalPayment;
+                    
+                    schedule.push({
+                        paymentNumber: i,
+                        date: new Date(currentDate),
+                        payment: emi,
+                        principal: principalPayment,
+                        interest: interest,
+                        balance: Math.max(0, balance)
+                    });
+                    
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                }
+                
+                return schedule;
+            }
+            
+            // Function to format currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(amount);
+            }
+            
+            // Function to format date
+            function formatDate(date) {
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+            
+            // Calculate button click handler
+            calculateBtn.addEventListener('click', function() {
+                const principal = parseFloat(document.getElementById('loanAmount').value);
+                const annualRate = parseFloat(document.getElementById('interestRate').value);
+                const termYears = document.getElementById('termUnit').value === 'years' 
+                    ? parseFloat(document.getElementById('loanTerm').value)
+                    : parseFloat(document.getElementById('loanTerm').value) / 12;
+                const startDate = document.getElementById('startDate').value;
+                
+                if (isNaN(principal) || isNaN(annualRate) || isNaN(termYears) || !startDate) {
+                    alert('Please enter valid loan details');
+                    return;
+                }
+                
+                const emi = calculateEMI(principal, annualRate, termYears);
+                const schedule = generateAmortizationSchedule(principal, annualRate, termYears, startDate);
+                const totalInterest = schedule.reduce((sum, payment) => sum + payment.interest, 0);
+                const totalPayment = principal + totalInterest;
+                
+                // Update summary
+                document.getElementById('monthlyPayment').textContent = formatCurrency(emi);
+                document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+                document.getElementById('totalPayment').textContent = formatCurrency(totalPayment);
+                
+                // Update payment breakdown chart
+                const principalPercentage = (principal / totalPayment) * 100;
+                paymentMarker.style.left = `${principalPercentage}%`;
+                
+                // Update amortization schedule
+                const tableBody = document.getElementById('amortizationTable');
+                tableBody.innerHTML = '';
+                
+                schedule.forEach(payment => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${payment.paymentNumber}</td>
+                        <td>${formatDate(payment.date)}</td>
+                        <td>${formatCurrency(payment.payment)}</td>
+                        <td>${formatCurrency(payment.principal)}</td>
+                        <td>${formatCurrency(payment.interest)}</td>
+                        <td>${formatCurrency(payment.balance)}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Enable download button
+                downloadBtn.disabled = false;
+            });
+            
+            // Download button click handler
+            downloadBtn.addEventListener('click', function() {
+                const schedule = [];
+                const rows = document.querySelectorAll('#amortizationTable tr');
+                
+                // Add headers
+                schedule.push(['Payment #', 'Date', 'Payment', 'Principal', 'Interest', 'Balance']);
+                
+                // Add data rows
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    schedule.push([
+                        cells[0].textContent,
+                        cells[1].textContent,
+                        cells[2].textContent,
+                        cells[3].textContent,
+                        cells[4].textContent,
+                        cells[5].textContent
+                    ]);
+                });
+                
+                // Convert to CSV
+                const csv = schedule.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'loan_amortization_schedule.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            });
+            
+            // Set default start date to today
+            document.getElementById('startDate').valueAsDate = new Date();
+            
+            // Disable download button initially
+            downloadBtn.disabled = true;
+        });
+    </script>
+</body>
+</html> 
