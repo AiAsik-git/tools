@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Checker - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tool-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .input-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .output-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .text-area {
+            min-height: 200px;
+            resize: vertical;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            line-height: 1.6;
+            width: 100%;
+        }
+        .output-text-container {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            line-height: 1.6;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .correction {
+            position: relative;
+            display: inline-block;
+            border-bottom: 2px solid #dc3545;
+            cursor: pointer;
+        }
+        .correction:hover {
+            background-color: #f8d7da;
+        }
+        .correction-suggestion {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 5px 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            min-width: 150px;
+            white-space: nowrap;
+        }
+        .correction:hover .correction-suggestion {
+            display: block;
+        }
+        .suggestion-item {
+            padding: 3px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .btn-check {
+            background-color: #6c63ff;
+            color: white;
+            transition: all 0.3s;
+        }
+        .btn-check:hover {
+            background-color: #5a52d5;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 99, 255, 0.2);
+        }
+        .btn-copy {
+            background-color: #28a745;
+            color: white;
+            transition: all 0.3s;
+        }
+        .btn-copy:hover {
+            background-color: #218838;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+        }
+        .btn-clear {
+            background-color: #dc3545;
+            color: white;
+            transition: all 0.3s;
+        }
+        .btn-clear:hover {
+            background-color: #c82333;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+        }
+        .summary-container {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .summary-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .summary-icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        .summary-text {
+            flex: 1;
+        }
+        .error-type {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        .setting-group {
+            margin-bottom: 20px;
+        }
+        .setting-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .language-selector {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .feature-item {
+            flex: 1 0 calc(33.333% - 15px);
+            min-width: 250px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .feature-icon {
+            font-size: 24px;
+            color: #6c63ff;
+            margin-bottom: 10px;
+        }
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6c63ff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+            margin-bottom: 15px;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .alert {
+            display: none;
+            margin-bottom: 15px;
+        }
+        .word-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="tool-container">
+            <!-- Title -->
+            <h2 class="text-center mb-4">Grammar Checker</h2>
+            <p class="text-center mb-4">Check your text for grammar, spelling, and punctuation errors</p>
+            
+            <!-- Input Container -->
+            <div class="input-container">
+                <div class="mb-3">
+                    <label for="inputText" class="form-label">Enter your text here:</label>
+                    <textarea id="inputText" class="text-area form-control" placeholder="Type or paste your text here to check for grammar errors..."></textarea>
+                    <div class="word-count mt-2" id="wordCount">0 words, 0 characters</div>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="setting-group">
+                        <label for="languageSelect" class="setting-label">Language:</label>
+                        <select id="languageSelect" class="language-selector">
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+                    
+                    <div class="settings-toggle">
+                        <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#advancedSettings" aria-expanded="false" aria-controls="advancedSettings">
+                            Advanced Settings <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="collapse mb-3" id="advancedSettings">
+                    <div class="card card-body">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="" id="checkGrammar" checked>
+                            <label class="form-check-label" for="checkGrammar">
+                                Grammar
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="" id="checkSpelling" checked>
+                            <label class="form-check-label" for="checkSpelling">
+                                Spelling
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="" id="checkPunctuation" checked>
+                            <label class="form-check-label" for="checkPunctuation">
+                                Punctuation
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="" id="checkStyle" checked>
+                            <label class="form-check-label" for="checkStyle">
+                                Style & Clarity
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger" id="errorAlert" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="errorMessage"></span>
+                </div>
+                
+                <div class="text-center">
+                    <button id="checkBtn" class="btn btn-check btn-lg">
+                        <i class="fas fa-check-circle me-2"></i>Check Grammar
+                    </button>
+                    <button id="clearBtn" class="btn btn-clear">
+                        <i class="fas fa-trash-alt me-2"></i>Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Output Container -->
+            <div class="output-container" id="outputContainer">
+                <h4 class="mb-3">Results:</h4>
+                
+                <div class="loader" id="loader"></div>
+                
+                <div class="summary-container">
+                    <h5 class="mb-3">Summary:</h5>
+                    <div id="errorSummary"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Corrected Text:</label>
+                    <div class="output-text-container" id="outputText"></div>
+                </div>
+                
+                <div class="text-center mb-3">
+                    <button id="copyBtn" class="btn btn-copy">
+                        <i class="fas fa-copy me-2"></i>Copy Corrected Text
+                    </button>
+                    <button id="reCheckBtn" class="btn btn-check ms-2">
+                        <i class="fas fa-sync-alt me-2"></i>Re-Check
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Features Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">About This Tool</h5>
+                    <p class="card-text">
+                        Our Grammar Checker is a powerful tool that helps you write flawlessly by identifying and correcting grammar,
+                        spelling, punctuation, and style errors in your text. Perfect for students, professionals, content creators, 
+                        and anyone who wants to improve their writing.
+                    </p>
+                    
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-spell-check"></i>
+                            </div>
+                            <div class="feature-title">Grammar & Spelling</div>
+                            <div class="feature-description">
+                                Identifies grammatical errors and spelling mistakes in your text with high accuracy.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-quote-right"></i>
+                            </div>
+                            <div class="feature-title">Punctuation</div>
+                            <div class="feature-description">
+                                Checks for correct punctuation usage, including commas, periods, and apostrophes.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-feather-alt"></i>
+                            </div>
+                            <div class="feature-title">Style Suggestions</div>
+                            <div class="feature-description">
+                                Offers suggestions to improve clarity, conciseness, and overall writing style.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="feature-title">Multiple Languages</div>
+                            <div class="feature-description">
+                                Supports various languages and regional dialects for comprehensive checking.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="feature-title">Privacy-Focused</div>
+                            <div class="feature-description">
+                                All processing happens in your browser. Your text isn't stored on servers.
+                            </div>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="feature-title">Easy to Use</div>
+                            <div class="feature-description">
+                                Simple, intuitive interface that makes grammar checking quick and effortless.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const inputText = document.getElementById('inputText');
+            const checkBtn = document.getElementById('checkBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const reCheckBtn = document.getElementById('reCheckBtn');
+            const outputContainer = document.getElementById('outputContainer');
+            const outputText = document.getElementById('outputText');
+            const errorSummary = document.getElementById('errorSummary');
+            const loader = document.getElementById('loader');
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+            const wordCount = document.getElementById('wordCount');
+            
+            // Sample grammar errors for demo purposes
+            const commonErrors = [
+                { type: 'Grammar', regex: /\b(they|their|them)\b/gi, suggestion: ['he/she', 'his/her', 'him/her'], explanation: "Make sure pronouns agree with their antecedents." },
+                { type: 'Grammar', regex: /\b(is|are|was|were)\s+suppose\s+to\b/gi, suggestion: ['is supposed to', 'are supposed to', 'was supposed to', 'were supposed to'], explanation: "The correct form is 'supposed to', not 'suppose to'." },
+                { type: 'Grammar', regex: /\bcould\s+of\b/gi, suggestion: ['could have'], explanation: "Use 'could have' instead of 'could of'." },
+                { type: 'Grammar', regex: /\bshould\s+of\b/gi, suggestion: ['should have'], explanation: "Use 'should have' instead of 'should of'." },
+                { type: 'Grammar', regex: /\bwould\s+of\b/gi, suggestion: ['would have'], explanation: "Use 'would have' instead of 'would of'." },
+                { type: 'Grammar', regex: /\bi\b/g, suggestion: ['I'], explanation: "The pronoun 'I' should always be capitalized." },
+                
+                { type: 'Spelling', regex: /\balot\b/gi, suggestion: ['a lot'], explanation: "'A lot' is two separate words." },
+                { type: 'Spelling', regex: /\bdefinately\b/gi, suggestion: ['definitely'], explanation: "The correct spelling is 'definitely'." },
+                { type: 'Spelling', regex: /\bseperate\b/gi, suggestion: ['separate'], explanation: "The correct spelling is 'separate'." },
+                { type: 'Spelling', regex: /\brecieve\b/gi, suggestion: ['receive'], explanation: "Remember the rule: 'i' before 'e' except after 'c'." },
+                { type: 'Spelling', regex: /\baccommodate\b/gi, suggestion: ['accommodate'], explanation: "The correct spelling has two 'c's and two 'm's." },
+                
+                { type: 'Punctuation', regex: /(?<=\w)\.(?=\w)/g, suggestion: ['. '], explanation: "Add a space after a period." },
+                { type: 'Punctuation', regex: /(?<=\w),(?=\w)/g, suggestion: [', '], explanation: "Add a space after a comma." },
+                { type: 'Punctuation', regex: /\s+,/g, suggestion: [','], explanation: "Don't put a space before a comma." },
+                { type: 'Punctuation', regex: /\s+\./g, suggestion: ['.'], explanation: "Don't put a space before a period." },
+                
+                { type: 'Style', regex: /\bvery\s+\w+/gi, suggestion: ['[stronger adjective]'], explanation: "Consider using a stronger adjective instead of 'very'." },
+                { type: 'Style', regex: /\breally\s+\w+/gi, suggestion: ['[stronger adjective]'], explanation: "Consider using a stronger adjective instead of 'really'." },
+                { type: 'Style', regex: /\bin\s+order\s+to\b/gi, suggestion: ['to'], explanation: "For conciseness, use 'to' instead of 'in order to'." },
+                { type: 'Style', regex: /\bdue\s+to\s+the\s+fact\s+that\b/gi, suggestion: ['because'], explanation: "For conciseness, use 'because' instead of 'due to the fact that'." }
+            ];
+            
+            // Event Listeners
+            checkBtn.addEventListener('click', checkGrammar);
+            clearBtn.addEventListener('click', clearText);
+            copyBtn.addEventListener('click', copyText);
+            reCheckBtn.addEventListener('click', checkGrammar);
+            inputText.addEventListener('input', updateWordCount);
+            
+            // Functions
+            function updateWordCount() {
+                const text = inputText.value;
+                const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                const chars = text.length;
+                wordCount.textContent = `${words} words, ${chars} characters`;
+            }
+            
+            function checkGrammar() {
+                const text = inputText.value.trim();
+                
+                if (!text) {
+                    showError("Please enter some text to check.");
+                    return;
+                }
+                
+                // Show loader and hide any previous error
+                loader.style.display = 'block';
+                errorAlert.style.display = 'none';
+                
+                // Simulate API delay
+                setTimeout(() => {
+                    // Process text for errors
+                    const processedResult = processText(text);
+                    
+                    // Update output
+                    outputText.innerHTML = processedResult.html;
+                    
+                    // Generate error summary
+                    generateErrorSummary(processedResult.errors);
+                    
+                    // Hide loader and show output
+                    loader.style.display = 'none';
+                    outputContainer.style.display = 'block';
+                    
+                    // Add click event for corrections
+                    addCorrectionEvents();
+                    
+                    // Scroll to result
+                    outputContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 1500);
+            }
+            
+            function processText(text) {
+                let processedText = text;
+                let htmlOutput = text;
+                const errors = {};
+                
+                // Check if options are enabled
+                const checkGrammar = document.getElementById('checkGrammar').checked;
+                const checkSpelling = document.getElementById('checkSpelling').checked;
+                const checkPunctuation = document.getElementById('checkPunctuation').checked;
+                const checkStyle = document.getElementById('checkStyle').checked;
+                
+                // Process each error type
+                commonErrors.forEach((errorType, index) => {
+                    // Skip if the corresponding check is disabled
+                    if (
+                        (errorType.type === 'Grammar' && !checkGrammar) ||
+                        (errorType.type === 'Spelling' && !checkSpelling) ||
+                        (errorType.type === 'Punctuation' && !checkPunctuation) ||
+                        (errorType.type === 'Style' && !checkStyle)
+                    ) {
+                        return;
+                    }
+                    
+                    // Find matches
+                    const matches = [...processedText.matchAll(errorType.regex)];
+                    
+                    if (matches.length > 0) {
+                        // Count errors by type
+                        if (!errors[errorType.type]) {
+                            errors[errorType.type] = 0;
+                        }
+                        errors[errorType.type] += matches.length;
+                        
+                        // Replace all matches with correction spans
+                        matches.forEach((match, matchIndex) => {
+                            const errorId = `error-${index}-${matchIndex}`;
+                            const suggestionHtml = errorType.suggestion.map(sug => 
+                                `<div class="suggestion-item" data-suggestion="${sug}">${sug}</div>`
+                            ).join('');
+                            
+                            const replacementHtml = `<span class="correction" id="${errorId}">${match[0]}
+                                <div class="correction-suggestion">
+                                    <div class="mb-1"><strong>${errorType.type} Error</strong></div>
+                                    <div class="mb-2 small">${errorType.explanation}</div>
+                                    <div class="suggestions">${suggestionHtml}</div>
+                                </div>
+                            </span>`;
+                            
+                            // Use a non-breaking placeholder to avoid regex conflicts
+                            const placeholder = `__PLACEHOLDER_${errorId}__`;
+                            htmlOutput = htmlOutput.replace(match[0], placeholder);
+                            
+                            // Replace placeholders with HTML later
+                            setTimeout(() => {
+                                htmlOutput = htmlOutput.replaceAll(placeholder, replacementHtml);
+                            }, 0);
+                        });
+                    }
+                });
+                
+                return {
+                    text: processedText,
+                    html: htmlOutput,
+                    errors: errors
+                };
+            }
+            
+            function generateErrorSummary(errors) {
+                if (Object.keys(errors).length === 0) {
+                    errorSummary.innerHTML = `
+                        <div class="summary-item">
+                            <div class="summary-icon text-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="summary-text">
+                                No errors found! Your text looks great.
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let summaryHtml = '';
+                const errorIcons = {
+                    'Grammar': 'fa-grammar',
+                    'Spelling': 'fa-spell-check',
+                    'Punctuation': 'fa-quote-right',
+                    'Style': 'fa-feather-alt'
+                };
+                
+                for (const [errorType, count] of Object.entries(errors)) {
+                    const iconClass = errorIcons[errorType] || 'fa-exclamation-circle';
+                    
+                    summaryHtml += `
+                        <div class="summary-item">
+                            <div class="summary-icon text-warning">
+                                <i class="fas ${iconClass}"></i>
+                            </div>
+                            <div class="summary-text">
+                                <span class="error-type">${errorType}:</span>
+                                ${count} ${count === 1 ? 'issue' : 'issues'} found
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                errorSummary.innerHTML = summaryHtml;
+            }
+            
+            function addCorrectionEvents() {
+                // Add click events to all suggestion items
+                const suggestionItems = document.querySelectorAll('.suggestion-item');
+                suggestionItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const suggestion = this.getAttribute('data-suggestion');
+                        const correctionSpan = this.closest('.correction');
+                        
+                        // Replace the text in the correction span
+                        correctionSpan.textContent = suggestion;
+                        correctionSpan.style.borderBottom = 'none';
+                        correctionSpan.style.backgroundColor = '#d4edda';
+                        correctionSpan.style.padding = '0 3px';
+                        correctionSpan.classList.remove('correction');
+                    });
+                });
+            }
+            
+            function clearText() {
+                inputText.value = '';
+                outputContainer.style.display = 'none';
+                errorAlert.style.display = 'none';
+                updateWordCount();
+            }
+            
+            function copyText() {
+                // Create a temporary element to copy from
+                const tempElement = document.createElement('div');
+                tempElement.innerHTML = outputText.innerHTML;
+                
+                // Remove all HTML tags and get text content
+                const textToCopy = tempElement.textContent;
+                
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    // Flash feedback
+                    copyBtn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy me-2"></i>Copy Corrected Text';
+                    }, 2000);
+                }).catch(() => {
+                    showError("Failed to copy text. Please try again.");
+                });
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorAlert.style.display = 'block';
+                
+                setTimeout(() => {
+                    errorAlert.style.display = 'none';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html> 

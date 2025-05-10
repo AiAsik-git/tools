@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tip Calculator - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .calculator-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .amount-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #198754;
+        }
+        .tip-option {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tip-option:hover {
+            transform: scale(1.05);
+        }
+        .tip-option.active {
+            background-color: #198754;
+            color: white;
+        }
+        .split-amount {
+            font-size: 1.2rem;
+            color: #0d6efd;
+        }
+        .rounding-option {
+            cursor: pointer;
+        }
+        .rounding-option.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .currency-symbol {
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+        .tip-breakdown {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .tip-chart {
+            height: 10px;
+            background: linear-gradient(90deg, #198754 0%, #0d6efd 100%);
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-calculator me-2"></i>Tip Calculator
+                    </h2>
+                    
+                    <!-- Calculator Section -->
+                    <div class="calculator-card">
+                        <!-- Bill Amount -->
+                        <div class="mb-4">
+                            <label class="form-label">Bill Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text currency-symbol">$</span>
+                                <input type="number" class="form-control" id="billAmount" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        
+                        <!-- Tip Percentage -->
+                        <div class="mb-4">
+                            <label class="form-label">Tip Percentage</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="tip-option btn btn-outline-primary" data-tip="10">10%</div>
+                                <div class="tip-option btn btn-outline-primary" data-tip="15">15%</div>
+                                <div class="tip-option btn btn-outline-primary" data-tip="20">20%</div>
+                                <div class="tip-option btn btn-outline-primary" data-tip="25">25%</div>
+                                <div class="input-group" style="width: 100px;">
+                                    <input type="number" class="form-control" id="customTip" min="0" max="100" placeholder="Custom">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Number of People -->
+                        <div class="mb-4">
+                            <label class="form-label">Number of People</label>
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" id="decreasePeople">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center" id="numPeople" min="1" value="1">
+                                <button class="btn btn-outline-secondary" id="increasePeople">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Rounding Options -->
+                        <div class="mb-4">
+                            <label class="form-label">Rounding</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="rounding" id="roundNone" value="none" checked>
+                                <label class="btn btn-outline-primary" for="roundNone">No Rounding</label>
+                                
+                                <input type="radio" class="btn-check" name="rounding" id="roundUp" value="up">
+                                <label class="btn btn-outline-primary" for="roundUp">Round Up</label>
+                                
+                                <input type="radio" class="btn-check" name="rounding" id="roundDown" value="down">
+                                <label class="btn btn-outline-primary" for="roundDown">Round Down</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Results -->
+                        <div class="tip-breakdown">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Tip Amount</h6>
+                                            <div class="amount-display" id="tipAmount">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Total Amount</h6>
+                                            <div class="amount-display" id="totalAmount">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Per Person</h6>
+                                            <div class="split-amount" id="perPerson">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">Tip Per Person</h6>
+                                            <div class="split-amount" id="tipPerPerson">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Tip Chart -->
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Bill</span>
+                                    <span>Tip</span>
+                                </div>
+                                <div class="tip-chart" id="tipChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calculation History -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Calculation History</h5>
+                                <button class="btn btn-sm btn-outline-danger" id="clearHistory">
+                                    <i class="fas fa-trash me-2"></i>Clear History
+                                </button>
+                            </div>
+                            <div id="calculationHistory">
+                                <!-- History items will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const billAmount = document.getElementById('billAmount');
+            const customTip = document.getElementById('customTip');
+            const numPeople = document.getElementById('numPeople');
+            const decreasePeople = document.getElementById('decreasePeople');
+            const increasePeople = document.getElementById('increasePeople');
+            const tipAmount = document.getElementById('tipAmount');
+            const totalAmount = document.getElementById('totalAmount');
+            const perPerson = document.getElementById('perPerson');
+            const tipPerPerson = document.getElementById('tipPerPerson');
+            const tipChart = document.getElementById('tipChart');
+            const clearHistory = document.getElementById('clearHistory');
+            const calculationHistory = document.getElementById('calculationHistory');
+            
+            let currentTip = 15;
+            let history = JSON.parse(localStorage.getItem('tipHistory')) || [];
+            
+            // Function to format currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                }).format(amount);
+            }
+            
+            // Function to round amount
+            function roundAmount(amount, type) {
+                switch (type) {
+                    case 'up':
+                        return Math.ceil(amount * 100) / 100;
+                    case 'down':
+                        return Math.floor(amount * 100) / 100;
+                    default:
+                        return amount;
+                }
+            }
+            
+            // Function to update tip display
+            function updateTipDisplay() {
+                const bill = parseFloat(billAmount.value) || 0;
+                const people = parseInt(numPeople.value) || 1;
+                const rounding = document.querySelector('input[name="rounding"]:checked').value;
+                
+                const tip = bill * (currentTip / 100);
+                const total = bill + tip;
+                const perPersonAmount = total / people;
+                const tipPerPersonAmount = tip / people;
+                
+                // Update displays
+                tipAmount.textContent = formatCurrency(roundAmount(tip, rounding));
+                totalAmount.textContent = formatCurrency(roundAmount(total, rounding));
+                perPerson.textContent = formatCurrency(roundAmount(perPersonAmount, rounding));
+                tipPerPerson.textContent = formatCurrency(roundAmount(tipPerPersonAmount, rounding));
+                
+                // Update tip chart
+                const tipPercentage = (tip / total) * 100;
+                tipChart.style.background = `linear-gradient(90deg, #198754 ${tipPercentage}%, #0d6efd ${tipPercentage}%)`;
+                
+                // Add to history
+                addToHistory(bill, tip, total, people);
+            }
+            
+            // Function to add to history
+            function addToHistory(bill, tip, total, people) {
+                const calculation = {
+                    bill: bill,
+                    tip: tip,
+                    total: total,
+                    people: people,
+                    tipPercentage: currentTip,
+                    timestamp: new Date().toISOString()
+                };
+                
+                history.unshift(calculation);
+                if (history.length > 10) history.pop();
+                
+                localStorage.setItem('tipHistory', JSON.stringify(history));
+                updateHistory();
+            }
+            
+            // Function to update history display
+            function updateHistory() {
+                calculationHistory.innerHTML = '';
+                
+                history.forEach(calc => {
+                    const item = document.createElement('div');
+                    item.className = 'd-flex justify-content-between align-items-center py-2 border-bottom';
+                    item.innerHTML = `
+                        <div>
+                            <span class="text-muted">Bill:</span> ${formatCurrency(calc.bill)} |
+                            <span class="text-muted">Tip:</span> ${formatCurrency(calc.tip)} (${calc.tipPercentage}%) |
+                            <span class="text-muted">Total:</span> ${formatCurrency(calc.total)} |
+                            <span class="text-muted">People:</span> ${calc.people}
+                        </div>
+                        <small class="text-muted">
+                            ${new Date(calc.timestamp).toLocaleString()}
+                        </small>
+                    `;
+                    calculationHistory.appendChild(item);
+                });
+            }
+            
+            // Event listeners
+            billAmount.addEventListener('input', updateTipDisplay);
+            customTip.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (!isNaN(value) && value >= 0 && value <= 100) {
+                    currentTip = value;
+                    document.querySelectorAll('.tip-option').forEach(option => {
+                        option.classList.remove('active');
+                    });
+                    updateTipDisplay();
+                }
+            });
+            
+            document.querySelectorAll('.tip-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    currentTip = parseFloat(this.dataset.tip);
+                    document.querySelectorAll('.tip-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    customTip.value = '';
+                    updateTipDisplay();
+                });
+            });
+            
+            decreasePeople.addEventListener('click', function() {
+                const value = parseInt(numPeople.value);
+                if (value > 1) {
+                    numPeople.value = value - 1;
+                    updateTipDisplay();
+                }
+            });
+            
+            increasePeople.addEventListener('click', function() {
+                const value = parseInt(numPeople.value);
+                numPeople.value = value + 1;
+                updateTipDisplay();
+            });
+            
+            numPeople.addEventListener('input', updateTipDisplay);
+            
+            document.querySelectorAll('input[name="rounding"]').forEach(radio => {
+                radio.addEventListener('change', updateTipDisplay);
+            });
+            
+            clearHistory.addEventListener('click', function() {
+                history = [];
+                localStorage.setItem('tipHistory', JSON.stringify(history));
+                updateHistory();
+            });
+            
+            // Initialize
+            document.querySelector('.tip-option[data-tip="15"]').classList.add('active');
+            updateTipDisplay();
+            updateHistory();
+        });
+    </script>
+</body>
+</html> 

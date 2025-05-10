@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy Text Generator | iLoveTools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #224abe;
+            --accent-color: #f6f9ff;
+            --text-color: #5a5c69;
+            --light-gray: #f8f9fc;
+            --medium-gray: #eaecf4;
+            --dark-gray: #858796;
+            --success-color: #1cc88a;
+            --danger-color: #e74a3b;
+        }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-gray);
+        }
+
+        .tool-container {
+            background-color: #fff;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .copy-btn {
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.2rem;
+            color: var(--primary-color);
+            background-color: var(--accent-color);
+            border: 1px solid var(--primary-color);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .fancy-text-output {
+            padding: 0.75rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 0.35rem;
+            margin-bottom: 0.75rem;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .text-style {
+            overflow-x: auto;
+            white-space: nowrap;
+            font-size: 1.1rem;
+            max-width: calc(100% - 80px);
+        }
+
+        .style-name {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .controls-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid var(--medium-gray);
+            border-radius: 0.35rem;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover, .control-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .control-btn i {
+            font-size: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .favorites-container {
+            margin-top: 1.5rem;
+        }
+
+        .favorites-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .favorite-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid var(--medium-gray);
+            border-radius: 0.35rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .favorite-text {
+            overflow-x: auto;
+            white-space: nowrap;
+            max-width: calc(100% - 100px);
+        }
+
+        .favorite-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .empty-favorites {
+            padding: 1rem;
+            text-align: center;
+            color: var(--dark-gray);
+            border: 1px dashed var(--medium-gray);
+            border-radius: 0.35rem;
+        }
+
+        .tooltip-inner {
+            max-width: 300px;
+        }
+
+        /* Extended styles for different text styles */
+        .double-struck { font-family: "Fira Code", monospace; }
+        .medieval { font-family: "Luminari", fantasy; }
+        .cursive-style { font-family: "Brush Script MT", cursive; }
+        .monospace { font-family: "Courier New", monospace; }
+        
+        @media (max-width: 768px) {
+            .controls-container {
+                flex-wrap: wrap;
+            }
+            
+            .control-btn {
+                flex: 0 0 calc(50% - 0.5rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="h3 mb-4 text-gray-800">Fancy Text Generator</h1>
+        <p class="mb-4">Convert regular text into various fancy styles for social media, messages, and more.</p>
+        
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="tool-container">
+                    <div class="mb-3">
+                        <label for="inputText" class="form-label">Enter your text</label>
+                        <textarea class="form-control" id="inputText" rows="3" placeholder="Type or paste your text here..."></textarea>
+                    </div>
+                    
+                    <div class="controls-container">
+                        <div class="control-btn" id="clearBtn">
+                            <i class="fas fa-trash-alt"></i> Clear
+                        </div>
+                        <div class="control-btn" id="favoriteBtn">
+                            <i class="far fa-star"></i> Add to Favorites
+                        </div>
+                        <div class="control-btn" id="copyAllBtn">
+                            <i class="fas fa-copy"></i> Copy All Styles
+                        </div>
+                    </div>
+                    
+                    <div id="outputContainer">
+                        <h5 class="mb-3">Fancy Text Styles</h5>
+                        
+                        <!-- Text style outputs will be generated here -->
+                    </div>
+                    
+                    <div class="favorites-container" id="favoritesContainer" style="display: none;">
+                        <div class="favorites-header">
+                            <h5 class="mb-0">Favorites</h5>
+                            <button class="btn btn-sm btn-outline-danger" id="clearFavoritesBtn">
+                                <i class="fas fa-trash-alt"></i> Clear All
+                            </button>
+                        </div>
+                        
+                        <div id="favoritesList">
+                            <div class="empty-favorites">No favorites saved yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="tool-container">
+                    <h5 class="mb-3">About Fancy Text Generator</h5>
+                    <p>This tool generates stylized text that you can use on:</p>
+                    
+                    <ul class="mb-4">
+                        <li>Social media profiles (Twitter, Instagram, Facebook, etc.)</li>
+                        <li>Discord, Telegram, WhatsApp, and other messaging apps</li>
+                        <li>Blog titles, signatures, and comments</li>
+                        <li>Creative projects and designs</li>
+                    </ul>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Note: Some platforms may not support all special characters and symbols. If a style doesn't display correctly, try a different one.</small>
+                    </div>
+                    
+                    <h6 class="mt-4">How It Works</h6>
+                    <p class="small">The Fancy Text Generator uses Unicode character mappings to transform normal text into decorative styles. Each character in your input text is replaced with an equivalent character from different Unicode blocks.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const inputText = document.getElementById('inputText');
+            const outputContainer = document.getElementById('outputContainer');
+            const clearBtn = document.getElementById('clearBtn');
+            const favoriteBtn = document.getElementById('favoriteBtn');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            const favoritesContainer = document.getElementById('favoritesContainer');
+            const favoritesList = document.getElementById('favoritesList');
+            const clearFavoritesBtn = document.getElementById('clearFavoritesBtn');
+            
+            // Text Styles
+            const textStyles = [
+                { name: 'Bold', transform: textToBold },
+                { name: 'Italic', transform: textToItalic },
+                { name: 'Bold Italic', transform: textToBoldItalic },
+                { name: 'Monospace', transform: textToMonospace },
+                { name: 'Double-struck', transform: textToDoubleStruck },
+                { name: 'Script', transform: textToScript },
+                { name: 'Circled', transform: textToCircled },
+                { name: 'Upside Down', transform: textToUpsideDown },
+                { name: 'Small Caps', transform: textToSmallCaps },
+                { name: 'Strikethrough', transform: textToStrikethrough },
+                { name: 'Fullwidth', transform: textToFullwidth },
+                { name: 'Bubble', transform: textToBubble },
+                { name: 'Medieval', transform: textToMedieval },
+                { name: 'Creepy', transform: textToCreepy },
+                { name: 'Cursive', transform: textToCursive }
+            ];
+            
+            // Favorites
+            let favorites = JSON.parse(localStorage.getItem('fancyTextFavorites')) || [];
+            
+            // Generate text styles when input changes
+            inputText.addEventListener('input', generateTextStyles);
+            
+            // Clear button
+            clearBtn.addEventListener('click', function() {
+                inputText.value = '';
+                generateTextStyles();
+            });
+            
+            // Favorite button
+            favoriteBtn.addEventListener('click', function() {
+                const text = inputText.value.trim();
+                if (text) {
+                    addToFavorites(text);
+                    updateFavoritesUI();
+                }
+            });
+            
+            // Copy all styles
+            copyAllBtn.addEventListener('click', function() {
+                const text = inputText.value.trim();
+                if (!text) return;
+                
+                let allStyles = '';
+                textStyles.forEach(style => {
+                    allStyles += `${style.name}: ${style.transform(text)}\n`;
+                });
+                
+                copyToClipboard(allStyles);
+                showTooltip(copyAllBtn, 'All styles copied!');
+            });
+            
+            // Clear favorites
+            clearFavoritesBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all favorites?')) {
+                    favorites = [];
+                    localStorage.setItem('fancyTextFavorites', JSON.stringify(favorites));
+                    updateFavoritesUI();
+                }
+            });
+            
+            // Generate text styles on load
+            generateTextStyles();
+            updateFavoritesUI();
+            
+            // Function to generate text styles
+            function generateTextStyles() {
+                const text = inputText.value.trim();
+                
+                // Clear previous outputs
+                while (outputContainer.children.length > 1) {
+                    outputContainer.removeChild(outputContainer.lastChild);
+                }
+                
+                if (!text) {
+                    return;
+                }
+                
+                // Generate each style
+                textStyles.forEach(style => {
+                    const transformedText = style.transform(text);
+                    
+                    // Create output element
+                    const outputElement = document.createElement('div');
+                    outputElement.className = 'fancy-text-output';
+                    
+                    outputElement.innerHTML = `
+                        <div class="text-container">
+                            <div class="style-name">${style.name}</div>
+                            <div class="text-style">${transformedText}</div>
+                        </div>
+                        <button class="copy-btn" data-text="${transformedText.replace(/"/g, '&quot;')}">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    `;
+                    
+                    // Add copy functionality
+                    const copyBtn = outputElement.querySelector('.copy-btn');
+                    copyBtn.addEventListener('click', function() {
+                        const textToCopy = this.getAttribute('data-text');
+                        copyToClipboard(textToCopy);
+                        showTooltip(this, 'Copied!');
+                    });
+                    
+                    outputContainer.appendChild(outputElement);
+                });
+            }
+            
+            // Function to update favorites UI
+            function updateFavoritesUI() {
+                if (favorites.length > 0) {
+                    favoritesContainer.style.display = 'block';
+                    favoritesList.innerHTML = '';
+                    
+                    favorites.forEach((fav, index) => {
+                        const favoriteItem = document.createElement('div');
+                        favoriteItem.className = 'favorite-item';
+                        
+                        favoriteItem.innerHTML = `
+                            <div class="favorite-text">${fav}</div>
+                            <div class="favorite-actions">
+                                <button class="copy-btn" data-text="${fav.replace(/"/g, '&quot;')}">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="copy-btn remove-btn" data-index="${index}">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        `;
+                        
+                        // Add copy functionality
+                        const copyBtn = favoriteItem.querySelector('.copy-btn:not(.remove-btn)');
+                        copyBtn.addEventListener('click', function() {
+                            const textToCopy = this.getAttribute('data-text');
+                            copyToClipboard(textToCopy);
+                            showTooltip(this, 'Copied!');
+                        });
+                        
+                        // Add remove functionality
+                        const removeBtn = favoriteItem.querySelector('.remove-btn');
+                        removeBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            favorites.splice(index, 1);
+                            localStorage.setItem('fancyTextFavorites', JSON.stringify(favorites));
+                            updateFavoritesUI();
+                        });
+                        
+                        favoritesList.appendChild(favoriteItem);
+                    });
+                } else {
+                    favoritesList.innerHTML = '<div class="empty-favorites">No favorites saved yet</div>';
+                    if (favorites.length === 0) {
+                        favoritesContainer.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Function to add to favorites
+            function addToFavorites(text) {
+                // Avoid duplicates
+                if (!favorites.includes(text)) {
+                    favorites.unshift(text);
+                    // Limit to 10 favorites
+                    if (favorites.length > 10) {
+                        favorites.pop();
+                    }
+                    localStorage.setItem('fancyTextFavorites', JSON.stringify(favorites));
+                }
+            }
+            
+            // Function to copy to clipboard
+            function copyToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+            
+            // Function to show tooltip
+            function showTooltip(element, message) {
+                const tooltip = new bootstrap.Tooltip(element, {
+                    title: message,
+                    placement: 'top',
+                    trigger: 'manual'
+                });
+                
+                tooltip.show();
+                
+                setTimeout(() => {
+                    tooltip.hide();
+                }, 1000);
+            }
+            
+            // Text transformation functions
+            function textToBold(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const bold = '𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗';
+                return mapChars(text, regular, bold);
+            }
+            
+            function textToItalic(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                const italic = '𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧';
+                return mapChars(text, regular, italic);
+            }
+            
+            function textToBoldItalic(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                const boldItalic = '𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛';
+                return mapChars(text, regular, boldItalic);
+            }
+            
+            function textToMonospace(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const monospace = '𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿';
+                return mapChars(text, regular, monospace);
+            }
+            
+            function textToDoubleStruck(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const doubleStruck = '𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡';
+                return mapChars(text, regular, doubleStruck);
+            }
+            
+            function textToScript(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                const script = '𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃';
+                return mapChars(text, regular, script);
+            }
+            
+            function textToCircled(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                const circled = 'ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ⓪①②③④⑤⑥⑦⑧⑨';
+                return mapChars(text, regular, circled);
+            }
+            
+            function textToUpsideDown(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,!?;\'"`()[]{}';
+                const upsideDown = 'ɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎzɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz0ƖᄅƐㄣϛ9ㄥ86˙\'¡¿؛,,,)(][}{';
+                return mapChars(text, regular, upsideDown).split('').reverse().join('');
+            }
+            
+            function textToSmallCaps(text) {
+                const regular = 'abcdefghijklmnopqrstuvwxyz';
+                const smallCaps = 'ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ';
+                return mapChars(text, regular, smallCaps);
+            }
+            
+            function textToStrikethrough(text) {
+                return text.split('').map(char => char + '\u0336').join('');
+            }
+            
+            function textToFullwidth(text) {
+                const regular = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+                const fullwidth = '　！"＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ［＼］＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｛｜｝～';
+                return mapChars(text, regular, fullwidth);
+            }
+            
+            function textToBubble(text) {
+                return '🅑🅤🅑🅑🅛🅔: ' + text;
+            }
+            
+            function textToMedieval(text) {
+                return text;  // Just apply the CSS class for display
+            }
+            
+            function textToCreepy(text) {
+                const zalgoMarks = [
+                    '\u030d', '\u030e', '\u0304', '\u0305', '\u033f', '\u0311', '\u0306', '\u0310',
+                    '\u0352', '\u0357', '\u0351', '\u0307', '\u0308', '\u030a', '\u0342', '\u0343',
+                    '\u0344', '\u034a', '\u034b', '\u034c', '\u0303', '\u0302', '\u030c', '\u0350',
+                    '\u0300', '\u0301', '\u030b', '\u030f', '\u0312', '\u0313', '\u0314', '\u033d',
+                    '\u0309', '\u0363', '\u0364', '\u0365', '\u0366', '\u0367', '\u0368', '\u0369',
+                    '\u036a', '\u036b', '\u036c', '\u036d', '\u036e', '\u036f', '\u033e', '\u035b'
+                ];
+                
+                return text.split('').map(char => {
+                    // Add between 1 and 3 random zalgo marks to each character
+                    const numMarks = Math.floor(Math.random() * 3) + 1;
+                    let result = char;
+                    
+                    for (let i = 0; i < numMarks; i++) {
+                        const randomMark = zalgoMarks[Math.floor(Math.random() * zalgoMarks.length)];
+                        result += randomMark;
+                    }
+                    
+                    return result;
+                }).join('');
+            }
+            
+            function textToCursive(text) {
+                const regular = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+                const cursive = '𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏';
+                return mapChars(text, regular, cursive);
+            }
+            
+            // Helper function to map characters
+            function mapChars(text, source, target) {
+                return text.split('').map(char => {
+                    const index = source.indexOf(char);
+                    return index !== -1 ? target[index] : char;
+                }).join('');
+            }
+        });
+    </script>
+</body>
+</html> 

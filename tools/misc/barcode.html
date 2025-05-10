@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Generator - iLoveTools</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --primary-light: #8ecae6;
+            --secondary-color: #2a9d8f;
+            --background-light: #f8f9fa;
+            --background-dark: #212529;
+            --text-light: #f8f9fa;
+            --text-dark: #212529;
+        }
+        
+        .tool-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .tool-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .form-container {
+            padding: 2rem;
+        }
+        
+        .format-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .format-option {
+            flex: 1 0 calc(33.333% - 10px);
+            min-width: 120px;
+            text-align: center;
+            padding: 12px 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .format-option:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(58, 134, 255, 0.05);
+        }
+        
+        .format-option.active {
+            border-color: var(--primary-color);
+            background-color: rgba(58, 134, 255, 0.1);
+        }
+        
+        .format-option i {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .format-option .format-name {
+            font-weight: 600;
+            display: block;
+        }
+        
+        .format-option .format-desc {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .barcode-preview {
+            padding: 1.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            min-height: 200px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .no-preview {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .barcode-preview canvas,
+        .barcode-preview svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .preview-text {
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-group h5 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-generate {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-generate:hover {
+            background-color: #2a6dd9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(58, 134, 255, 0.2);
+        }
+        
+        .btn-download {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-download:hover {
+            background-color: #218a7e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(42, 157, 143, 0.2);
+        }
+        
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-reset:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
+        }
+        
+        .download-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        .download-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .download-option:hover {
+            border-color: var(--secondary-color);
+            background-color: rgba(42, 157, 143, 0.05);
+        }
+        
+        .download-option i {
+            font-size: 18px;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+        
+        .download-option span {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .info-card {
+            background-color: var(--background-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-card h5 {
+            color: var(--primary-color);
+            margin-bottom: 0.8rem;
+        }
+        
+        .features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-item {
+            flex: 1 0 calc(50% - 15px);
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        .feature-item i {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .feature-item h6 {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .format-option {
+                flex: 1 0 calc(50% - 10px);
+            }
+            
+            .feature-item {
+                flex: 1 0 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .format-option {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tool-container">
+            <div class="tool-header">
+                <h2><i class="fas fa-barcode"></i> Barcode Generator</h2>
+                <p>Generate various types of barcodes for your business needs</p>
+            </div>
+            
+            <div class="form-container">
+                <div class="control-group">
+                    <h5>1. Select Barcode Format</h5>
+                    <div class="format-selector">
+                        <div class="format-option active" data-format="code128">
+                            <i class="fas fa-barcode"></i>
+                            <span class="format-name">Code 128</span>
+                            <span class="format-desc">General purpose</span>
+                        </div>
+                        <div class="format-option" data-format="ean13">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="format-name">EAN-13</span>
+                            <span class="format-desc">Retail products</span>
+                        </div>
+                        <div class="format-option" data-format="upc">
+                            <i class="fas fa-tag"></i>
+                            <span class="format-name">UPC-A</span>
+                            <span class="format-desc">US retail products</span>
+                        </div>
+                        <div class="format-option" data-format="code39">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span class="format-name">Code 39</span>
+                            <span class="format-desc">Industrial & logistics</span>
+                        </div>
+                        <div class="format-option" data-format="ean8">
+                            <i class="fas fa-box"></i>
+                            <span class="format-name">EAN-8</span>
+                            <span class="format-desc">Small retail items</span>
+                        </div>
+                        <div class="format-option" data-format="itf14">
+                            <i class="fas fa-box-open"></i>
+                            <span class="format-name">ITF-14</span>
+                            <span class="format-desc">Packaging levels</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h5>2. Enter Barcode Data</h5>
+                    <div class="mb-3">
+                        <label for="barcodeData" class="form-label">Barcode Content</label>
+                        <input type="text" class="form-control" id="barcodeData" placeholder="Enter the data for your barcode">
+                        <div class="error-message" id="dataError"></div>
+                    </div>
+                    
+                    <div class="info-card" id="formatInfo">
+                        <h5>Code 128</h5>
+                        <p>Code 128 is a high-density linear barcode symbology that can encode all 128 ASCII characters. It's suitable for a wide range of applications including shipping, packaging, and inventory tracking.</p>
+                        <ul>
+                            <li><strong>Valid characters:</strong> All ASCII characters (0-127)</li>
+                            <li><strong>Length:</strong> Variable</li>
+                            <li><strong>Example:</strong> ABC-123456-789</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h5>3. Customize Appearance</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="barcodeWidth" class="form-label">Width (px)</label>
+                            <input type="number" class="form-control" id="barcodeWidth" min="100" max="800" value="300">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="barcodeHeight" class="form-label">Height (px)</label>
+                            <input type="number" class="form-control" id="barcodeHeight" min="30" max="400" value="100">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="barcodeColor" class="form-label">Bar Color</label>
+                            <input type="color" class="form-control" id="barcodeColor" value="#000000">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="barcodeBackground" class="form-label">Background Color</label>
+                            <input type="color" class="form-control" id="barcodeBackground" value="#FFFFFF">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="displayText" checked>
+                                <label class="form-check-label" for="displayText">
+                                    Display text below barcode
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="includeMargin" checked>
+                                <label class="form-check-label" for="includeMargin">
+                                    Include margins
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h5>4. Generate & Preview</h5>
+                    <div class="barcode-preview" id="barcodePreview">
+                        <div class="no-preview">Your barcode preview will appear here</div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-generate" id="generateBtn">
+                            <i class="fas fa-magic me-2"></i>Generate Barcode
+                        </button>
+                        <button class="btn-download" id="downloadBtn" disabled>
+                            <i class="fas fa-download me-2"></i>Download
+                        </button>
+                        <button class="btn-reset" id="resetBtn">
+                            <i class="fas fa-redo me-2"></i>Reset
+                        </button>
+                    </div>
+                    
+                    <div class="download-options" id="downloadOptions" style="display: none;">
+                        <div class="download-option" data-format="png">
+                            <i class="fas fa-file-image"></i>
+                            <span>PNG</span>
+                        </div>
+                        <div class="download-option" data-format="svg">
+                            <i class="fas fa-file-code"></i>
+                            <span>SVG</span>
+                        </div>
+                        <div class="download-option" data-format="pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-light">
+                <h5>About Barcodes</h5>
+                <p>Barcodes are machine-readable representations of data that are widely used for product identification, inventory tracking, and logistics. Different barcode types have specific applications and requirements.</p>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-store"></i>
+                        <h6>Retail Applications</h6>
+                        <p>EAN and UPC barcodes are standard for retail products worldwide and are required for selling in stores.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-warehouse"></i>
+                        <h6>Inventory Management</h6>
+                        <p>Code 128 and Code 39 are commonly used for internal inventory tracking systems within businesses.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shipping-fast"></i>
+                        <h6>Logistics & Shipping</h6>
+                        <p>ITF-14 barcodes are used on packaging for shipping and warehousing applications.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-qrcode"></i>
+                        <h6>Beyond Barcodes</h6>
+                        <p>Modern applications may use 2D codes like QR codes, which can store more data than traditional barcodes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JsBarcode Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const formatOptions = document.querySelectorAll('.format-option');
+            const barcodeDataInput = document.getElementById('barcodeData');
+            const dataError = document.getElementById('dataError');
+            const barcodeWidthInput = document.getElementById('barcodeWidth');
+            const barcodeHeightInput = document.getElementById('barcodeHeight');
+            const barcodeColorInput = document.getElementById('barcodeColor');
+            const barcodeBackgroundInput = document.getElementById('barcodeBackground');
+            const displayTextCheckbox = document.getElementById('displayText');
+            const includeMarginCheckbox = document.getElementById('includeMargin');
+            const barcodePreview = document.getElementById('barcodePreview');
+            const formatInfo = document.getElementById('formatInfo');
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const downloadOptions = document.getElementById('downloadOptions');
+            const downloadOptionBtns = document.querySelectorAll('.download-option');
+            
+            // State
+            let currentFormat = 'code128';
+            let currentBarcode = null;
+            
+            // Format information
+            const formatData = {
+                code128: {
+                    title: 'Code 128',
+                    description: 'Code 128 is a high-density linear barcode symbology that can encode all 128 ASCII characters. It\'s suitable for a wide range of applications including shipping, packaging, and inventory tracking.',
+                    validChars: 'All ASCII characters (0-127)',
+                    length: 'Variable',
+                    example: 'ABC-123456-789',
+                    validator: (data) => true  // All ASCII characters are valid
+                },
+                ean13: {
+                    title: 'EAN-13',
+                    description: 'EAN-13 is the international standard for retail products. It encodes 13 digits, with the last digit being a check digit that is automatically calculated.',
+                    validChars: 'Numbers only (0-9)',
+                    length: '12 digits (13th digit is a checksum)',
+                    example: '590123412345',
+                    validator: (data) => /^\d{12}$/.test(data)
+                },
+                upc: {
+                    title: 'UPC-A',
+                    description: 'UPC-A is the standard barcode for retail products in the United States and Canada. It encodes 12 digits, with the last digit being a check digit.',
+                    validChars: 'Numbers only (0-9)',
+                    length: '11 digits (12th digit is a checksum)',
+                    example: '01234567890',
+                    validator: (data) => /^\d{11}$/.test(data)
+                },
+                code39: {
+                    title: 'Code 39',
+                    description: 'Code 39 is a discrete barcode symbology that can encode uppercase letters (A-Z), digits (0-9) and special characters like space, minus (-), plus (+), period (.), dollar sign ($), slash (/), and percent (%).',
+                    validChars: 'A-Z, 0-9, -, ., $, /, +, %, and space',
+                    length: 'Variable',
+                    example: 'CODE-39',
+                    validator: (data) => /^[A-Z0-9\-\.\$\/\+\% ]+$/.test(data)
+                },
+                ean8: {
+                    title: 'EAN-8',
+                    description: 'EAN-8 is a shorter version of EAN-13, used for small retail items where a full EAN-13 barcode won\'t fit. It encodes 8 digits, with the last digit being a check digit.',
+                    validChars: 'Numbers only (0-9)',
+                    length: '7 digits (8th digit is a checksum)',
+                    example: '9638507',
+                    validator: (data) => /^\d{7}$/.test(data)
+                },
+                itf14: {
+                    title: 'ITF-14',
+                    description: 'ITF-14 is used to encode a Global Trade Item Number (GTIN). It is used on packaging levels for products in the supply chain. The barcode is based on the Interleaved 2 of 5 symbology.',
+                    validChars: 'Numbers only (0-9)',
+                    length: '13 digits (14th digit is a checksum)',
+                    example: '1234567890123',
+                    validator: (data) => /^\d{13}$/.test(data)
+                }
+            };
+            
+            // Format selection
+            formatOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Update active state
+                    formatOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    // Update current format
+                    currentFormat = option.dataset.format;
+                    
+                    // Update format info
+                    updateFormatInfo();
+                    
+                    // Clear any error
+                    clearError();
+                });
+            });
+            
+            // Update format info based on selection
+            function updateFormatInfo() {
+                const info = formatData[currentFormat];
+                
+                formatInfo.innerHTML = `
+                    <h5>${info.title}</h5>
+                    <p>${info.description}</p>
+                    <ul>
+                        <li><strong>Valid characters:</strong> ${info.validChars}</li>
+                        <li><strong>Length:</strong> ${info.length}</li>
+                        <li><strong>Example:</strong> ${info.example}</li>
+                    </ul>
+                `;
+                
+                // Also update the placeholder text
+                barcodeDataInput.placeholder = `Enter ${info.title} data (e.g., ${info.example})`;
+            }
+            
+            // Generate barcode
+            generateBtn.addEventListener('click', generateBarcode);
+            
+            function generateBarcode() {
+                // Get values
+                const data = barcodeDataInput.value.trim();
+                const width = parseInt(barcodeWidthInput.value);
+                const height = parseInt(barcodeHeightInput.value);
+                const color = barcodeColorInput.value;
+                const background = barcodeBackgroundInput.value;
+                const displayText = displayTextCheckbox.checked;
+                const includeMargin = includeMarginCheckbox.checked;
+                
+                // Validate data
+                if (!data) {
+                    showError('Please enter barcode data.');
+                    return;
+                }
+                
+                // Format-specific validation
+                const formatValidator = formatData[currentFormat].validator;
+                if (!formatValidator(data)) {
+                    showError(`Invalid data for ${formatData[currentFormat].title}. ${formatData[currentFormat].validChars}`);
+                    return;
+                }
+                
+                // Clear any previous barcode
+                barcodePreview.innerHTML = '';
+                
+                // Create SVG element for the barcode
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                barcodePreview.appendChild(svg);
+                
+                try {
+                    // Generate barcode
+                    JsBarcode(svg, data, {
+                        format: currentFormat,
+                        width: 2,
+                        height: height,
+                        displayValue: displayText,
+                        margin: includeMargin ? 10 : 0,
+                        background: background,
+                        lineColor: color,
+                        fontSize: 16,
+                        textMargin: 6
+                    });
+                    
+                    // Store current barcode
+                    currentBarcode = {
+                        data: data,
+                        format: currentFormat,
+                        svg: svg
+                    };
+                    
+                    // Add text with barcode details below
+                    const previewText = document.createElement('div');
+                    previewText.className = 'preview-text';
+                    previewText.textContent = `${formatData[currentFormat].title}: ${data}`;
+                    barcodePreview.appendChild(previewText);
+                    
+                    // Enable download button and show download options
+                    downloadBtn.disabled = false;
+                    
+                    // Clear any error
+                    clearError();
+                } catch (error) {
+                    showError(`Error generating barcode: ${error.message}`);
+                    barcodePreview.innerHTML = '<div class="no-preview">Error generating barcode. Please check your input.</div>';
+                }
+            }
+            
+            // Reset form
+            resetBtn.addEventListener('click', resetForm);
+            
+            function resetForm() {
+                // Reset input fields
+                barcodeDataInput.value = '';
+                barcodeWidthInput.value = '300';
+                barcodeHeightInput.value = '100';
+                barcodeColorInput.value = '#000000';
+                barcodeBackgroundInput.value = '#FFFFFF';
+                displayTextCheckbox.checked = true;
+                includeMarginCheckbox.checked = true;
+                
+                // Reset format to default
+                formatOptions.forEach(opt => opt.classList.remove('active'));
+                formatOptions[0].classList.add('active');
+                currentFormat = 'code128';
+                
+                // Update format info
+                updateFormatInfo();
+                
+                // Clear preview
+                barcodePreview.innerHTML = '<div class="no-preview">Your barcode preview will appear here</div>';
+                
+                // Disable download button
+                downloadBtn.disabled = true;
+                downloadOptions.style.display = 'none';
+                
+                // Clear any error
+                clearError();
+                
+                // Reset current barcode
+                currentBarcode = null;
+            }
+            
+            // Show error message
+            function showError(message) {
+                dataError.textContent = message;
+                dataError.style.display = 'block';
+            }
+            
+            // Clear error message
+            function clearError() {
+                dataError.textContent = '';
+                dataError.style.display = 'none';
+            }
+            
+            // Download button
+            downloadBtn.addEventListener('click', () => {
+                if (downloadOptions.style.display === 'none') {
+                    downloadOptions.style.display = 'flex';
+                } else {
+                    downloadOptions.style.display = 'none';
+                }
+            });
+            
+            // Download options
+            downloadOptionBtns.forEach(option => {
+                option.addEventListener('click', () => {
+                    const format = option.dataset.format;
+                    downloadBarcode(format);
+                    downloadOptions.style.display = 'none';
+                });
+            });
+            
+            function downloadBarcode(format) {
+                if (!currentBarcode) return;
+                
+                const filename = `barcode-${currentBarcode.format}-${Date.now()}`;
+                
+                if (format === 'svg') {
+                    // Download as SVG
+                    const svgData = new XMLSerializer().serializeToString(currentBarcode.svg);
+                    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                    const svgUrl = URL.createObjectURL(svgBlob);
+                    
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = svgUrl;
+                    downloadLink.download = `${filename}.svg`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    
+                    URL.revokeObjectURL(svgUrl);
+                } else if (format === 'png') {
+                    // Download as PNG
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Set canvas size
+                    const svgRect = currentBarcode.svg.getBoundingClientRect();
+                    canvas.width = svgRect.width;
+                    canvas.height = svgRect.height;
+                    
+                    // Draw SVG to canvas
+                    const svgData = new XMLSerializer().serializeToString(currentBarcode.svg);
+                    const img = new Image();
+                    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+                    
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Convert canvas to PNG
+                        const pngUrl = canvas.toDataURL('image/png');
+                        
+                        // Download PNG
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = pngUrl;
+                        downloadLink.download = `${filename}.png`;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    };
+                } else if (format === 'pdf') {
+                    // Download as PDF
+                    if (window.jspdf && window.jspdf.jsPDF) {
+                        // Get image dimensions
+                        const svgRect = currentBarcode.svg.getBoundingClientRect();
+                        const width = svgRect.width;
+                        const height = svgRect.height;
+                        
+                        // Convert SVG to image
+                        const svgData = new XMLSerializer().serializeToString(currentBarcode.svg);
+                        const img = new Image();
+                        img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+                        
+                        img.onload = function() {
+                            // Create PDF
+                            const pdf = new window.jspdf.jsPDF({
+                                orientation: width > height ? 'landscape' : 'portrait',
+                                unit: 'mm'
+                            });
+                            
+                            // Calculate PDF dimensions
+                            const pdfWidth = pdf.internal.pageSize.getWidth();
+                            const pdfHeight = pdf.internal.pageSize.getHeight();
+                            
+                            // Calculate image size to fit the page
+                            const ratio = width / height;
+                            let imgWidth = pdfWidth - 40; // 20mm margin on each side
+                            let imgHeight = imgWidth / ratio;
+                            
+                            // If image height exceeds page height, adjust
+                            if (imgHeight > pdfHeight - 40) {
+                                imgHeight = pdfHeight - 40;
+                                imgWidth = imgHeight * ratio;
+                            }
+                            
+                            // Center the image
+                            const x = (pdfWidth - imgWidth) / 2;
+                            const y = (pdfHeight - imgHeight) / 2;
+                            
+                            // Add title
+                            pdf.setFontSize(16);
+                            pdf.text(`${formatData[currentBarcode.format].title} Barcode`, pdfWidth / 2, 20, { align: 'center' });
+                            
+                            // Add barcode data
+                            pdf.setFontSize(12);
+                            pdf.text(`Data: ${currentBarcode.data}`, pdfWidth / 2, 30, { align: 'center' });
+                            
+                            // Add image
+                            const canvas = document.createElement('canvas');
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // Add image to PDF
+                            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgWidth, imgHeight);
+                            
+                            // Save PDF
+                            pdf.save(`${filename}.pdf`);
+                        };
+                    } else {
+                        showError('PDF export library not loaded. Please try another format.');
+                    }
+                }
+            }
+            
+            // Initialize
+            updateFormatInfo();
+        });
+    </script>
+</body>
+</html> 

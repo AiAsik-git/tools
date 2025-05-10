@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Video Downloader - iLoveTools</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/styles.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .converter-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(29, 161, 242, 0.15);
+            border-color: rgba(29, 161, 242, 0.3);
+        }
+        .input-group-text {
+            background-color: #f0f0f0;
+        }
+        .twitter-input {
+            border-color: #e0e0e0;
+        }
+        .btn-twitter {
+            background-color: #1DA1F2;
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        .btn-twitter:hover {
+            background-color: #0d8ecf;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(29, 161, 242, 0.2);
+        }
+        .video-container {
+            display: none;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .video-preview {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: contain;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #000;
+        }
+        .video-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .video-option {
+            flex: 1;
+            min-width: 150px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            padding: 10px;
+            text-align: center;
+        }
+        .video-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .video-option.selected {
+            border-color: #1DA1F2;
+            box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.2);
+        }
+        .video-quality-icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #1DA1F2;
+        }
+        .video-quality-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .video-quality-info {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .tweet-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #1DA1F2;
+        }
+        .tweet-text {
+            font-weight: 400;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        .tweet-author {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .tweet-author .author-name {
+            margin-right: 5px;
+        }
+        .tweet-author .author-handle {
+            color: #6c757d;
+            font-weight: normal;
+        }
+        .error-message {
+            color: #dc3545;
+            background-color: #fdf1f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner-border {
+            color: #1DA1F2;
+            width: 3rem;
+            height: 3rem;
+        }
+        .disclaimer {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .disclaimer-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .disclaimer-title i {
+            margin-right: 5px;
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="tool-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fab fa-twitter me-2" style="color: #1DA1F2;"></i>Twitter Video Downloader
+                    </h2>
+                    
+                    <!-- Converter Section -->
+                    <div class="converter-card">
+                        <!-- URL Input -->
+                        <div class="mb-4">
+                            <label for="twitterUrl" class="form-label">Enter Twitter Post URL</label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="fab fa-twitter"></i></span>
+                                <input type="text" class="form-control twitter-input" id="twitterUrl" 
+                                       placeholder="https://twitter.com/username/status/1234567890">
+                                <button class="btn btn-twitter" id="fetchBtn">
+                                    <i class="fas fa-search me-1"></i> Fetch Video
+                                </button>
+                            </div>
+                            <div class="form-text">Paste a Twitter post URL that contains a video</div>
+                            
+                            <div class="disclaimer">
+                                <div class="disclaimer-title">
+                                    <i class="fas fa-info-circle"></i> Important Note
+                                </div>
+                                <p class="mb-0">
+                                    Due to Twitter's API restrictions, this tool demonstrates the concept of a Twitter video downloader. 
+                                    For real-world applications, API authorization or third-party services would be required.
+                                    Remember to respect copyright when downloading videos.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Loader -->
+                        <div class="loader" id="loader">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Fetching video from Twitter...</p>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="error-message"></div>
+                        
+                        <!-- Video Display -->
+                        <div class="video-container" id="videoContainer">
+                            <h5 class="mb-3">Twitter Video</h5>
+                            
+                            <video id="videoPreview" class="video-preview" controls>
+                                Your browser does not support the video tag.
+                            </video>
+                            
+                            <h6 class="mb-3">Available Formats</h6>
+                            <div class="video-options" id="videoOptions">
+                                <div class="video-option selected" data-quality="hd">
+                                    <div class="video-quality-icon">
+                                        <i class="fas fa-film"></i>
+                                    </div>
+                                    <div class="video-quality-label">HD Quality</div>
+                                    <div class="video-quality-info">720p - MP4</div>
+                                </div>
+                                <div class="video-option" data-quality="sd">
+                                    <div class="video-quality-icon">
+                                        <i class="fas fa-video"></i>
+                                    </div>
+                                    <div class="video-quality-label">SD Quality</div>
+                                    <div class="video-quality-info">480p - MP4</div>
+                                </div>
+                                <div class="video-option" data-quality="low">
+                                    <div class="video-quality-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="video-quality-label">Low Quality</div>
+                                    <div class="video-quality-info">240p - MP4</div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button id="downloadBtn" class="btn btn-twitter">
+                                    <i class="fas fa-download me-2"></i>Download Video
+                                </button>
+                            </div>
+                            
+                            <div class="tweet-info" id="tweetInfo">
+                                <h5>Tweet Information</h5>
+                                <div class="tweet-author" id="tweetAuthor">
+                                    <span class="author-name">Twitter User</span>
+                                    <span class="author-handle">@twitteruser</span>
+                                </div>
+                                <div class="tweet-text" id="tweetText">This is a sample tweet with a video. #video #twitter</div>
+                                <div class="text-muted" id="tweetDate">Posted on: -</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- About Section -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title">About This Tool</h5>
+                            <p class="card-text">
+                                This tool allows you to download videos from Twitter posts.
+                                Simply paste a Twitter post URL and get access to the video in multiple qualities.
+                                Perfect for content creators, journalists, and social media managers.
+                            </p>
+                            <h6>Features:</h6>
+                            <ul>
+                                <li>Extract videos from Twitter posts</li>
+                                <li>Download in multiple qualities (HD, SD, Low)</li>
+                                <li>Preview videos before downloading</li>
+                                <li>View tweet information (author, text, date)</li>
+                                <li>Simple and user-friendly interface</li>
+                            </ul>
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                Please respect copyright and only download content you have permission to use.
+                                This tool is intended for educational purposes only.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const twitterUrl = document.getElementById('twitterUrl');
+            const fetchBtn = document.getElementById('fetchBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const videoContainer = document.getElementById('videoContainer');
+            const videoPreview = document.getElementById('videoPreview');
+            const videoOptions = document.getElementById('videoOptions');
+            const tweetInfo = document.getElementById('tweetInfo');
+            const tweetAuthor = document.getElementById('tweetAuthor');
+            const tweetText = document.getElementById('tweetText');
+            const tweetDate = document.getElementById('tweetDate');
+            const errorMessage = document.getElementById('errorMessage');
+            const loader = document.getElementById('loader');
+            
+            // State variables
+            let currentTweetId = '';
+            let currentVideoUrls = {
+                hd: '',
+                sd: '',
+                low: ''
+            };
+            let selectedQuality = 'hd';
+            
+            // Event Listeners
+            fetchBtn.addEventListener('click', fetchVideo);
+            downloadBtn.addEventListener('click', downloadVideo);
+            twitterUrl.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    fetchVideo();
+                }
+            });
+            
+            // Add click event for video quality options
+            document.querySelectorAll('.video-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    document.querySelectorAll('.video-option').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Set selected quality
+                    selectedQuality = this.dataset.quality;
+                    
+                    // Update video source if available
+                    if (currentVideoUrls[selectedQuality]) {
+                        videoPreview.src = currentVideoUrls[selectedQuality];
+                        videoPreview.load();
+                        videoPreview.play();
+                    }
+                });
+            });
+            
+            // Functions
+            function fetchVideo() {
+                const url = twitterUrl.value.trim();
+                
+                if (!url) {
+                    showError('Please enter a Twitter URL');
+                    return;
+                }
+                
+                // Extract tweet ID from URL
+                const tweetId = extractTweetId(url);
+                
+                if (!tweetId) {
+                    showError('Invalid Twitter URL. Please enter a valid tweet URL.');
+                    return;
+                }
+                
+                // Show loader and hide error
+                hideError();
+                loader.style.display = 'block';
+                videoContainer.style.display = 'none';
+                
+                // Set current tweet ID
+                currentTweetId = tweetId;
+                
+                // In a real implementation, we would call an API to fetch the Twitter video
+                // For demonstration purposes, we'll simulate a fetch and use placeholder data
+                simulateFetch(tweetId);
+            }
+            
+            function extractTweetId(url) {
+                // Twitter URL format: https://twitter.com/username/status/1234567890
+                const regExp = /twitter\.com\/[^\/]+\/status\/(\d+)/i;
+                const match = url.match(regExp);
+                
+                if (match && match[1]) {
+                    return match[1];
+                }
+                
+                // For x.com URLs: https://x.com/username/status/1234567890
+                const xRegExp = /x\.com\/[^\/]+\/status\/(\d+)/i;
+                const xMatch = url.match(xRegExp);
+                
+                if (xMatch && xMatch[1]) {
+                    return xMatch[1];
+                }
+                
+                // For mobile URLs: https://mobile.twitter.com/username/status/1234567890
+                const mobileRegExp = /mobile\.twitter\.com\/[^\/]+\/status\/(\d+)/i;
+                const mobileMatch = url.match(mobileRegExp);
+                
+                if (mobileMatch && mobileMatch[1]) {
+                    return mobileMatch[1];
+                }
+                
+                return null;
+            }
+            
+            function simulateFetch(tweetId) {
+                // Simulate API delay
+                setTimeout(() => {
+                    // For demo purposes, we'll use a sample video
+                    // In a real implementation, this would be fetched from Twitter's API
+                    
+                    // Generate random selection of free sample videos
+                    const sampleVideos = [
+                        'https://www.w3schools.com/html/mov_bbb.mp4',
+                        'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4',
+                        'https://file-examples.com/storage/fe7d3a0d44631509da1f416/2017/04/file_example_MP4_480_1_5MG.mp4'
+                    ];
+                    
+                    const randomIndex = Math.floor(Math.random() * sampleVideos.length);
+                    const videoUrl = sampleVideos[randomIndex];
+                    
+                    // Set video sources for different qualities (in a real app, these would be different)
+                    currentVideoUrls = {
+                        hd: videoUrl,
+                        sd: videoUrl,
+                        low: videoUrl
+                    };
+                    
+                    // Set video source and load
+                    videoPreview.src = currentVideoUrls[selectedQuality];
+                    videoPreview.load();
+                    
+                    // Set tweet info
+                    const authorName = document.querySelector('.author-name');
+                    const authorHandle = document.querySelector('.author-handle');
+                    
+                    authorName.textContent = 'Twitter User';
+                    authorHandle.textContent = '@twitteruser';
+                    tweetText.textContent = 'This is a sample tweet containing a video. Check out this amazing content! #twitter #video';
+                    tweetDate.textContent = `Posted on: ${new Date().toLocaleDateString()}`;
+                    
+                    // Hide loader and show video
+                    loader.style.display = 'none';
+                    videoContainer.style.display = 'block';
+                    
+                }, 1500); // Simulate network delay
+            }
+            
+            function downloadVideo() {
+                if (!currentVideoUrls[selectedQuality]) {
+                    showError('No video to download. Please fetch a video first.');
+                    return;
+                }
+                
+                // Create a link element and trigger download
+                fetch(currentVideoUrls[selectedQuality])
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = `twitter_video_${currentTweetId}_${selectedQuality}.mp4`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(blobUrl);
+                    })
+                    .catch(() => {
+                        showError('Failed to download the video. Please try again.');
+                    });
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+            
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 
